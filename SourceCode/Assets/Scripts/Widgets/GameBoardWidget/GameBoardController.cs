@@ -59,7 +59,7 @@ public class GameBoardController : Controller<GameBoardView, GameBoardModel>
     }
     public bool PlaceUnit(UnitController unit, Vector2Int coords)
     {
-        Debug.Log("Try place unit at "+coords);
+        //Debug.Log("Try place unit at "+coords);
         //Calculate upper bounds
         Vector2Int upperBound = unit.SizeByUnit + coords;
         //Check candidate building within the bounds

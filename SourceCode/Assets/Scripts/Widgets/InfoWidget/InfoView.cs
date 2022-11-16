@@ -10,6 +10,7 @@ public class InfoView : View<InfoModel>
     public PropertyData emptyPropertyData;
 
     public Text title, description;
+    public Image image;
     public Text effectTitle,operationTitle;
     public ScrollRect operationListScroll;
     public ScrollRect effectListScroll;
@@ -59,6 +60,16 @@ public class InfoView : View<InfoModel>
 
         title.text = Model.CurrentData.title;
         description.text = Model.CurrentData.description;
+        if (Model.CurrentData.image)
+        {
+            image.color = Color.white;
+            image.sprite = Model.CurrentData.image;
+        }
+        else
+        {
+            image.color = Color.clear;
+        }
+
         FillOperations();
         FillEffects();
 

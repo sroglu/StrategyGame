@@ -15,7 +15,6 @@ public enum UnitType
 public class UnitData : ScriptableObject,ICloneable
 {
     public string unitName="New Unit";
-    public Sprite image;
     public Vector2Int dimensions = new Vector2Int(1,1);
 
     public UnitType type;

@@ -20,5 +20,6 @@ MonoBehaviour:
   propertyData:
     title: Wall
     description: Blocks units.
+    image: {fileID: 6334790780991472626, guid: 15417a1c2d9838047994bcb14e686563, type: 3}
     operations: []
     effects: []

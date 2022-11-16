@@ -105,7 +105,7 @@ public class ProductionView : View<ProductionModel>
         {
             productionSlot.index = unitIndex;
             UnitData unitData = Controller.AvailableUnits[unitIndex];
-            productionSlot.image.sprite = unitData.image;
+            productionSlot.image.sprite = unitData.propertyData.image;
             productionSlot.OnClick += () => OnRowElementClicked(unitData);
             unitIndex++;
             if (unitIndex >= Controller.AvailableUnits.Length)

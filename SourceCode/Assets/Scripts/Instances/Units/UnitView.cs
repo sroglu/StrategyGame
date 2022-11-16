@@ -23,7 +23,7 @@ public class UnitView : View<UnitModel>
     }
     protected override void OnInit()
     {
-        image.sprite = Model.CurrentData.image;
+        image.sprite = Model.CurrentData.propertyData.image;
     }
     public override void UpdateView()
     {

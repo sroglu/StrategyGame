@@ -21,6 +21,7 @@ public class PropertyData : ICloneable
 {
 
     public string title,description;
+    public UnityEngine.Sprite image;
 
     public Operation[] operations;
     public Effect[] effects;

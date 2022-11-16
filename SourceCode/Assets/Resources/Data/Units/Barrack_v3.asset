@@ -20,6 +20,7 @@ MonoBehaviour:
   propertyData:
     title: Barrack 3
     description: It can produce soldiers.
+    image: {fileID: 2712931066488642984, guid: 15417a1c2d9838047994bcb14e686563, type: 3}
     operations:
     - name: Spawn Soldier
       operation: operation.spawn.soldier
