@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0998f45af33ab02408eceab634618340, type: 3}
+  m_Name: Barrack_v4
+  m_EditorClassIdentifier: 
+  unitName: Barrack 4
+  image: {fileID: 2816646505712439911, guid: 15417a1c2d9838047994bcb14e686563, type: 3}
+  dimensions: {x: 4, y: 4}
+  type: 1
+  spawnFrom: 0
+  propertyData:
+    title: Barrack 4
+    description: It can produce soldiers.
+    operations:
+    - name: Spawn Soldier
+      operation: operation.spawn.soldier
+      amount: 1
+    - name: Spawn Soldier 2
+      operation: operation.spawn.soldier
+      amount: 2
+    - name: Spawn Soldier 3
+      operation: operation.spawn.soldier
+      amount: 3
+    - name: Spawn Soldier 4
+      operation: operation.spawn.soldier
+      amount: 4
+    effects: []

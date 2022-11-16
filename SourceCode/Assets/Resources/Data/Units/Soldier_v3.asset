@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0998f45af33ab02408eceab634618340, type: 3}
+  m_Name: Soldier_v3
+  m_EditorClassIdentifier: 
+  unitName: Soldier
+  image: {fileID: -5016416793089130713, guid: ceb0cd61341aceb488d9fb3bf477f3bc, type: 3}
+  dimensions: {x: 1, y: 1}
+  type: 3
+  spawnFrom: 1
+  propertyData:
+    title: 
+    description: 
+    operations:
+    - name: Move
+      operation: operation.move
+      amount: 0
+    - name: Deal Damage
+      operation: operation.damage
+      amount: 30
+    effects:
+    - name: Engage Enemy
+      effect: effect.engage.enemy
+      amount: 1
