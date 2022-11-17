@@ -31,7 +31,10 @@ public class UnitView : View<UnitModel>
 
     private void Update()
     {
-        Controller.UnityUpdate();
+        if (Controller.SnapToPointer)
+        {
+            rectTransform.anchoredPosition = Pointer.current.position.ReadValue();
+        }
     }
 
 }

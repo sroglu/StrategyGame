@@ -9,18 +9,22 @@ public class InfoController : Controller<InfoView, InfoModel>
     {
     }
 
+    UnitController activeUnit;
+
     protected override void OnActionRedirected(IController source, string actionName, EventArgs data)
     {
         if(actionName==Constants.Events.ShowUnitInfo)
         {
-            Events.UnitEventArgs unitEventArgs = data as Events.UnitEventArgs;
+            Events.GetInfoUnitEventArgs unitEventArgs = data as Events.GetInfoUnitEventArgs;
             if (unitEventArgs != null && unitEventArgs.unitController != null)
             {
-                unitEventArgs.unitController.ShowInfoOn(this);
+                activeUnit = unitEventArgs.unitController;
+                activeUnit?.ShowInfoOn(this);
             }
             else
             {
                 Show(View.emptyPropertyData);
+                activeUnit=null;
             }
         }
     }
@@ -33,6 +37,6 @@ public class InfoController : Controller<InfoView, InfoModel>
 
     public void PerformOperation(Operation op)
     {
-        Redirect(op.operation,new Events.OperationEventArgs(op));
+        activeUnit?.PerformOperation(op);
     }
 }

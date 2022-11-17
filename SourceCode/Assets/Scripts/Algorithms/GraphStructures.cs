@@ -11,31 +11,20 @@ namespace mehmetsrl.Algorithms.DataStructures {
         public static uint OccupiedTile { get { return occupiedTile; } private set { occupiedTile = value; } }
         T holder;
         public Vector2Int position { get; private set; }
-        public Vector2Int size { get; private set; }
 
         public T Holder { 
             get { return holder; } 
             set {
-                //Fills the holder and arrange occupied tiles
-                if (holder == null && value != null)
-                {
-                    for (int i = 0; i < size.x * size.y; i++)
-                        OccupiedTile++;
-                }
-                else if (holder != null && value == null)
-                {
-                    for (int i = 0; i < size.x * size.y; i++)
-                        OccupiedTile--;
-                }
+                if (holder == null && value != null) OccupiedTile++;
+                else if (holder != null && value == null) OccupiedTile--;
                 holder = value; 
             } 
         }
 
-        public Tile_Vector2Int(T holder, Vector2Int position, Vector2Int size)
+        public Tile_Vector2Int(T holder, Vector2Int position)
         {
             this.holder = holder;
             this.position = position;
-            this.size = size;
         }
     }
     public class GraphDataStruct_Vector2IntBoard<T> : IHasNeighbours<Tile_Vector2Int<T>>
@@ -71,8 +60,7 @@ namespace mehmetsrl.Algorithms.DataStructures {
                 Vector2Int candidateNeigbourPos = tile.position + neigbourDirection;
                 if (TileWithinBounds(candidateNeigbourPos))
                 {
-                    Tile_Vector2Int<T> candidateNeigbourPivot = tiles[candidateNeigbourPos.x, candidateNeigbourPos.y];
-                    Tile_Vector2Int<T>[] candidateNeigbourArea = new Tile_Vector2Int<T>[tile.size.x* tile.size.y];
+                    Tile_Vector2Int<T> candidateNeigbour = tiles[candidateNeigbourPos.x, candidateNeigbourPos.y];
 
                     if (candidateNeigbour.Holder == null)
                         neighbours.Add(candidateNeigbour);

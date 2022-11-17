@@ -38,14 +38,9 @@ public abstract class ControllerBase : IController
     }
     void OnRedirectToAction(IController source, string actionName, string controllerName, EventArgs data)
     {
-        if (controllerName == null)
+        if (controllerName == null || controllerName == GetType().ToString())
         {
             OnActionRedirected(source, actionName, data);
-        }
-        else
-        {
-            if (controllerName == GetType().ToString())
-                OnActionRedirected(source, actionName, data);
         }
     }
 

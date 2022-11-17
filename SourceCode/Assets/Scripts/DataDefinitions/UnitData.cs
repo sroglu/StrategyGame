@@ -19,6 +19,7 @@ public class UnitData : ScriptableObject,ICloneable
 
     public UnitType type;
     public UnitType spawnFrom;
+    public UnitData[] spawns;
 
     public PropertyData propertyData;
 

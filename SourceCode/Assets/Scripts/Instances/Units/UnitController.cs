@@ -2,10 +2,16 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
 public class UnitController : Controller<UnitView, UnitModel>
 {
+    public UnityAction<Vector2Int> OnPlaced;
+
+    public Vector2Int PositionByUnit { get; private set; }
+    public bool SnapToPointer { get; private set; }
+
     public Vector2Int SizeByUnit { get { return Model.CurrentData.dimensions; } }
     public Vector2 SizeByPixel { get { return View.rectTransform.sizeDelta; } private set { View.rectTransform.sizeDelta=value; } }
 
@@ -27,18 +33,28 @@ public class UnitController : Controller<UnitView, UnitModel>
         View.rectTransform.anchorMin = Vector2.zero;
         View.rectTransform.anchorMax = Vector2.zero;
     }
-    public void PlaceTo(RectTransform parent, Vector2 position)
+    public void PlaceTo(RectTransform parent,Vector2Int positionByUnit, Vector2 position)
     {
-        PlaceTo(parent, position, Vector2.zero, Vector2.zero);
+        PlaceTo(parent, positionByUnit, position, Vector2.zero, Vector2.zero);
     }
-    public void PlaceTo(RectTransform parent, Vector2 position,Vector2 anchoredMin,Vector2 anchoredMax)
+    public void PlaceTo(RectTransform parent, Vector2Int positionByUnit, Vector2 position,Vector2 anchoredMin,Vector2 anchoredMax)
     {
         View.rectTransform.parent = parent;
         View.rectTransform.anchorMin = anchoredMin;
         View.rectTransform.anchorMax = anchoredMax;
         View.rectTransform.anchoredPosition = position;
+        PositionByUnit = positionByUnit;
+        SnapToPointer = false;
+        OnPlaced?.Invoke(PositionByUnit);
     }
 
+    public virtual void PerformOperation(Operation op) { }
     public virtual void UnityUpdate(){ }
+
+
+    protected override void OnDestroy()
+    {
+        this.snapEndCallback = null;
+    }
 
 }

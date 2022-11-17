@@ -40,14 +40,12 @@ public class ProductionController : Controller<ProductionView, ProductionModel>
     public void InitUnit(UnitData unitData)
     {
         if (!CanProduceUnit) return;
+        CanProduceUnit = false;
 
-        BuildingUnitController buildingUnitController = new BuildingUnitController(new UnitModel(unitData));
+        UnitController unitController = new UnitController(new UnitModel(unitData));
+        //unitController.OnPlaced += (_) => CanProduceUnit = true;
 
-        buildingUnitController.SetSnapToPointer(true, 
-            () => CanProduceUnit = !buildingUnitController.SnapToPointer);
-        CanProduceUnit = !buildingUnitController.SnapToPointer;
-
-        Redirect(Constants.Events.AddUnit, Constants.Controllers.GameBoardController, new Events.UnitEventArgs(buildingUnitController));
+        Redirect(Constants.Events.AddUnit, Constants.Controllers.GameBoardController, new Events.AddUnitEventArgs(unitController));
     }
 
 

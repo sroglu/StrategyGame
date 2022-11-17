@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class BuildingUnitController : UnitController
@@ -7,34 +8,17 @@ public class BuildingUnitController : UnitController
     {
     }
 
-    Action snapEndCallback;
-    public bool SnapToPointer { get; private set; }
-    protected override void OnDestroy()
+    public override void PerformOperation(Operation op)
     {
-        this.snapEndCallback = null;
-    }
-
-    public void SetSnapToPointer(bool snap = true, Action snapEndCallback = null)
-    {
-        SnapToPointer = snap;
-
-        if (snap)
+        switch (op.operation)
         {
-            this.snapEndCallback = snapEndCallback;
-            GameViewConfig();
-        }
-        else
-        {
-            this.snapEndCallback?.Invoke();
-            this.snapEndCallback = null;
-        }
-    }
+            case Constants.Operations.SpawnSoldier:
 
-    public override void UnityUpdate()
-    {
-        if (SnapToPointer)
-        {
-            View.rectTransform.anchoredPosition = Pointer.current.position.ReadValue();
+                SoldierUnitController soldierController = new SoldierUnitController(new UnitModel(Model.CurrentData.spawns[(int)op.amount]));
+
+                Redirect(Constants.Events.AddUnit, Constants.Controllers.GameBoardController, new Events.AddRandomUnitEventArgs(this));
+
+                break;
         }
     }
 }
