@@ -104,11 +104,11 @@ public class ProductionView : View<ProductionModel>
         foreach (var productionSlot in rowElement.productionSlots)
         {
             productionSlot.index = unitIndex;
-            UnitData unitData = Controller.AvailableUnits[unitIndex];
+            UnitData unitData = Controller.BuildableUnits[unitIndex];
             productionSlot.image.sprite = unitData.propertyData.image;
             productionSlot.OnClick += () => OnRowElementClicked(unitData);
             unitIndex++;
-            if (unitIndex >= Controller.AvailableUnits.Length)
+            if (unitIndex >= Controller.BuildableUnits.Length)
                 unitIndex = 0;
         }
     }
@@ -137,7 +137,7 @@ public class ProductionView : View<ProductionModel>
     public void OnReplacement(Transform trans)
     {
         //If row number cannot hold whole production units add new rows
-        if (productionScrollView.content.childCount * colNum < Controller.AvailableUnits.Length)
+        if (productionScrollView.content.childCount * colNum < Controller.BuildableUnits.Length)
         {
             rowElementPool.Get();
             contentRectTransform.GetComponent<ScrollContent>().StartScrollContent();

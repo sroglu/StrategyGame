@@ -1,13 +1,10 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace mehmetsrl.Algorithms.DataStructures
 {
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using UnityEngine;
 
     public class QueueEntry<TKey, TValue> : IComparable<QueueEntry<TKey, TValue>> where TKey : IComparable<TKey>
     {

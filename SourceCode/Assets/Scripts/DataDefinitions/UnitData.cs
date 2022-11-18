@@ -6,9 +6,8 @@ using UnityEngine;
 public enum UnitType
 {
     none,
-    barrack,
-    powerPlant,
-    soldier
+    building,
+    agent
 }
 
 [CreateAssetMenu(fileName = "New Unit", menuName = "Unit")]
@@ -18,7 +17,6 @@ public class UnitData : ScriptableObject,ICloneable
     public Vector2Int dimensions = new Vector2Int(1,1);
 
     public UnitType type;
-    public UnitType spawnFrom;
     public UnitData[] spawns;
 
     public PropertyData propertyData;

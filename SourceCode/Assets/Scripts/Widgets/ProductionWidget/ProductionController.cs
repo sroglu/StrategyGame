@@ -9,7 +9,7 @@ public class ProductionController : Controller<ProductionView, ProductionModel>
     UnitData[] availableUnits;
     public bool CanProduceUnit { get; private set; }
 
-    public UnitData[] AvailableUnits
+    public UnitData[] BuildableUnits
     {
         get
         {
@@ -18,7 +18,7 @@ public class ProductionController : Controller<ProductionView, ProductionModel>
                 List<UnitData> availableUnitList = new List<UnitData>();
                 foreach (var unit in Model.CurrentData.units)
                 {
-                    if (unit.spawnFrom == UnitType.none)
+                    if (unit.type == UnitType.building)
                     {
                         availableUnitList.Add(unit);
                     }
@@ -29,7 +29,6 @@ public class ProductionController : Controller<ProductionView, ProductionModel>
         }
     }
 
-
     public ProductionController(ProductionModel model, ProductionView view) : base(ControllerType.instance, model, view)
     {
     }
@@ -37,16 +36,14 @@ public class ProductionController : Controller<ProductionView, ProductionModel>
     {
         CanProduceUnit = true;
     }
+
     public void InitUnit(UnitData unitData)
     {
         if (!CanProduceUnit) return;
         CanProduceUnit = false;
 
-        UnitController unitController = new UnitController(new UnitModel(unitData));
-        //unitController.OnPlaced += (_) => CanProduceUnit = true;
+        var initiatedBuildingUnitController = InstanceManager.Instance.CreateBuilding(unitData);
 
-        Redirect(Constants.Events.AddUnit, Constants.Controllers.GameBoardController, new Events.AddUnitEventArgs(unitController));
+        View.StartCoroutine(initiatedBuildingUnitController.AddUnitToGameBoard(() => CanProduceUnit = true));
     }
-
-
 }

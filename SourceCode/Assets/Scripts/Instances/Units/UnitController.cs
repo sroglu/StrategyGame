@@ -5,16 +5,32 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
-public class UnitController : Controller<UnitView, UnitModel>
+public abstract class UnitController : Controller<UnitView, UnitModel>
 {
-    public UnityAction<Vector2Int> OnPlaced;
-
     public Vector2Int PositionByUnit { get; private set; }
-    public bool SnapToPointer { get; private set; }
+    public bool Placed { get; private set; }
 
     public Vector2Int SizeByUnit { get { return Model.CurrentData.dimensions; } }
     public Vector2 SizeByPixel { get { return View.rectTransform.sizeDelta; } private set { View.rectTransform.sizeDelta=value; } }
 
+    public bool HasOperation(Operation operation)
+    {
+        foreach (var op in Model.CurrentData.propertyData.operations)
+        {
+            if(operation.command==op.command)
+                return true;
+        }
+        return false;
+    }
+    public bool HasEffect(Effect effect)
+    {
+        foreach (var ef in Model.CurrentData.propertyData.effects)
+        {
+            if (effect.effect == ef.effect)
+                return true;
+        }
+        return false;
+    }
 
     public UnitController(UnitModel model) : base(ControllerType.instance, model)
     {
@@ -27,34 +43,55 @@ public class UnitController : Controller<UnitView, UnitModel>
     {
         infoController.Show(Model.CurrentData.propertyData);
     }
-    protected void GameViewConfig()
-    {
-        View.transform.parent = GameManager.Instance.CurrentPage.GetView().transform;
-        View.rectTransform.anchorMin = Vector2.zero;
-        View.rectTransform.anchorMax = Vector2.zero;
-    }
     public void PlaceTo(RectTransform parent,Vector2Int positionByUnit, Vector2 position)
     {
         PlaceTo(parent, positionByUnit, position, Vector2.zero, Vector2.zero);
     }
     public void PlaceTo(RectTransform parent, Vector2Int positionByUnit, Vector2 position,Vector2 anchoredMin,Vector2 anchoredMax)
     {
-        View.rectTransform.parent = parent;
-        View.rectTransform.anchorMin = anchoredMin;
-        View.rectTransform.anchorMax = anchoredMax;
-        View.rectTransform.anchoredPosition = position;
+        View.Place(parent, position, anchoredMin, anchoredMax);
         PositionByUnit = positionByUnit;
-        SnapToPointer = false;
-        OnPlaced?.Invoke(PositionByUnit);
+        Placed = true;
     }
 
-    public virtual void PerformOperation(Operation op) { }
-    public virtual void UnityUpdate(){ }
-
-
-    protected override void OnDestroy()
+    public virtual void PerformDefaultOperation()
     {
-        this.snapEndCallback = null;
+        Events.OperationEvent e = GetDefaultOperation();
+        if (e != null) {
+            PerformOperation(e);
+        }
     }
+
+    public void Abandon()
+    {
+        Dispose();
+    }
+
+    public IEnumerator AddUnitToGameBoard(Action callback)
+    {
+        Events.AddUnitEventArgs e = new Events.AddUnitEventArgs(this);
+        Redirect(Constants.Events.AddUnit, Constants.Controllers.GameBoardController, e);
+        Placed = false;
+        do
+        {
+            View.FollowCursor();
+            yield return new WaitForFixedUpdate();
+        }
+        while (!Placed);
+        callback?.Invoke();
+    }
+
+    public virtual void PerformOperation(Events.OperationEvent e) {
+        if (HasOperation(e.operation))
+            Redirect(Constants.Events.PerformOperation, Constants.Controllers.GameBoardController, e);
+    }
+
+    public Events.OperationEvent GetOperation(uint index)
+    {
+        if (index < Model.CurrentData.propertyData.operations.Length)
+            return new Events.OperationEvent(this, Model.CurrentData.propertyData.operations[index]);
+        return null;
+    }
+    protected virtual Events.OperationEvent GetDefaultOperation() { return null; }
 
 }

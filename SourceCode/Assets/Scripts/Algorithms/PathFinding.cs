@@ -1,16 +1,11 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-
-
+using System.Diagnostics;
+using mehmetsrl.Algorithms.DataStructures;
 
 namespace mehmetsrl.Algorithms.Graph
 {
-    using mehmetsrl.Algorithms.DataStructures;
-    using System;
-	using System.Collections;
-	using System.Collections.Generic;
-	using System.Diagnostics;
 
 	/// <summary>
 	/// Generic Implementation of the A* algorithm.

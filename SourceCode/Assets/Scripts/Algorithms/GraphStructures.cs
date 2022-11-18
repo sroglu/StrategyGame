@@ -1,6 +1,7 @@
 
 using mehmetsrl.Algorithms.Graph;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace mehmetsrl.Algorithms.DataStructures {
@@ -26,6 +27,20 @@ namespace mehmetsrl.Algorithms.DataStructures {
             this.holder = holder;
             this.position = position;
         }
+
+
+        public override bool Equals(object obj)
+        {
+            var otherTile = obj as Tile_Vector2Int<T>;
+
+            if (otherTile == null) return false;
+
+            return (this.position == otherTile.position);
+        }
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
     public class GraphDataStruct_Vector2IntBoard<T> : IHasNeighbours<Tile_Vector2Int<T>>
     {
@@ -49,7 +64,7 @@ namespace mehmetsrl.Algorithms.DataStructures {
 
         bool TileWithinBounds(Vector2Int tilePos)
         {
-            return (tilePos.x > 0 && tilePos.x < tiles.GetLength(0) && tilePos.y > 0 && tilePos.y < tiles.GetLength(1));
+            return (tilePos.x >= 0 && tilePos.x < tiles.GetLength(0) && tilePos.y >= 0 && tilePos.y < tiles.GetLength(1));
         }
 
         public IEnumerable<Tile_Vector2Int<T>> Neighbours(Tile_Vector2Int<T> tile)
@@ -63,11 +78,13 @@ namespace mehmetsrl.Algorithms.DataStructures {
                     Tile_Vector2Int<T> candidateNeigbour = tiles[candidateNeigbourPos.x, candidateNeigbourPos.y];
 
                     if (candidateNeigbour.Holder == null)
+                    {
                         neighbours.Add(candidateNeigbour);
+                    }
                 }
             }
 
-            return neighbours;
+            return neighbours.AsEnumerable();
         }
     }
 }

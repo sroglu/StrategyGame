@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using mehmetsrl.Algorithms.DataStructures;
 using System.Collections;
 
-public class GameBoardController : Controller<GameBoardView, GameBoardModel>
+public partial class GameBoardController : Controller<GameBoardView, GameBoardModel>
 {
     Tile_Vector2Int<UnitController>[,] gameBoard;
     uint occupiedTile =0;
@@ -26,130 +26,41 @@ public class GameBoardController : Controller<GameBoardView, GameBoardModel>
         }
     }
 
-    #region UtilityFunctions
+    UnitController activeUnit,unitToBePlaced,candidateUnitToMove;
 
-    //Board Functions
-    public Vector2Int GetBoardCoordsFromRelativePosition(Vector2 pointerRelativePosition)
+    public void OnRightClickOnBoard(Vector2 viewRelativePosition)
     {
-        return new Vector2Int((int)(pointerRelativePosition.x / Model.CurrentData.tileSize.x), (int)(pointerRelativePosition.y / Model.CurrentData.tileSize.y));
-    }
-    public Vector2 GetBoardRelativePositionFromCoords(Vector2Int coords)
-    {
-        return new Vector2(coords.x * Model.CurrentData.tileSize.x, -coords.y * Model.CurrentData.tileSize.y);
-    }
-    public Vector2 GetPxelSizeFromUnitSize(Vector2Int size)
-    {
-        return new Vector2(size.x * Model.CurrentData.tileSize.x, size.y * Model.CurrentData.tileSize.y);
-    }
-    bool CheckAreaIsAvailable(Vector2Int pivot, Vector2Int size)
-    {
-        //Calculate upper bounds
-        var upperBound = pivot + size;
-
-        for (int i = 0; i < size.x; i++)
+        if (unitToBePlaced != null)
         {
-            for (int j = 0; j < size.y; j++)
-            {
-                //Check candidate building within the bounds
-                if (pivot.x >= 0 && pivot.y >= 0 && upperBound.x <= gameBoard.GetLength(0) && upperBound.y <= gameBoard.GetLength(1))
-                {
-                    if (GetUnitAtCoord(new Vector2Int(pivot.x + i, pivot.y + j)) != null)
-                        return false;
-                }
-                else
-                    return false;
-            }
+            unitToBePlaced.Abandon();
+            unitToBePlaced = null;
         }
-        return true;
-    }
-    public UnitController GetUnitAtCoord(Vector2Int coord)
-    {
-        if(coord.x>=0&& coord.x<Model.CurrentData.tileNum.x && coord.y >= 0 && coord.y < Model.CurrentData.tileNum.y)
-            return gameBoard[coord.x, coord.y].Holder;
-        return null;
-    }
-    void OccupyUnitTilesOnBoard(UnitController unitToPlace, Vector2Int coords)
-    {
-        for (int i = 0; i < unitToPlace.SizeByUnit.x; i++)
-            for (int j = 0; j < unitToPlace.SizeByUnit.y; j++)
-            {
-                Vector2Int setCoords = new Vector2Int(coords.x + i, coords.y + j);
-                gameBoard[setCoords.x, setCoords.y].Holder=unitToPlace;
-                occupiedTile++;
-            }
-
-    }
-    public bool PlaceUnit(UnitController unit, Vector2Int coords)
-    {
-        //Debug.Log("Try place unit at "+coords);
-
-        //If candidate building does not intersect with other instances place it.
-        if (CheckAreaIsAvailable(coords, unit.SizeByUnit))
+        else if (activeUnit != null)
         {
-            OccupyUnitTilesOnBoard(unit, coords);
-            unit.PlaceTo(View.rectTransform, coords,GetBoardRelativePositionFromCoords(coords), Vector2.up, Vector2.up);
-            return true;
+            activeUnit.PerformDefaultOperation();
         }
-
-        return false;
-    }
-    public void SetUnitPixelSize(UnitController unit)
-    {
-        unit.SetPixelSize(
-                    new Vector2(
-                        unit.SizeByUnit.x * Model.CurrentData.tileSize.x,
-                        unit.SizeByUnit.y * Model.CurrentData.tileSize.y));
     }
 
-    List<Vector2Int> GetTilePositionsAroundUnit(UnitController unit)
-    {
-        var result=new List<Vector2Int>();
-
-        for (int x = unit.PositionByUnit.x - 1; x < unit.PositionByUnit.x + unit.SizeByUnit.x+1;)
-        {
-            for (int y = unit.PositionByUnit.y - 1; y < unit.PositionByUnit.y + unit.SizeByUnit.y+1;y++)
-            {
-                Vector2Int candidateTileCoords = new Vector2Int(x, y);
-                if (CheckAreaIsAvailable(candidateTileCoords, Vector2Int.one))
-                {
-                    result.Add(candidateTileCoords);
-                }
-
-                if (x >= unit.PositionByUnit.x && x <= unit.PositionByUnit.x + unit.SizeByUnit.x &&
-                    y >= unit.PositionByUnit.y && y <= unit.PositionByUnit.y + unit.SizeByUnit.y)
-                {
-                    x += unit.PositionByUnit.x;
-                }
-                else
-                    x++;
-            }
-        }
-
-        return result;
-    }
-
-    #endregion
-
-
-
-    UnitController unitToBePlaced;
     public void OnClickOnBoard(Vector2 viewRelativePosition)
     {
         Vector2Int boardCoord = GetBoardCoordsFromRelativePosition(viewRelativePosition);
 
         if (unitToBePlaced != null)
         {
-            if (PlaceUnit(unitToBePlaced, boardCoord))
+            if (TryPlaceUnit(unitToBePlaced, boardCoord))
             {
                 OpenInfo(unitToBePlaced);
                 unitToBePlaced = null;
                 View.EndFeedback();
             }
+        }else if (candidateUnitToMove != null)
+        {
+            View.StartCoroutine(MoveUnit(candidateUnitToMove, boardCoord));
         }
         else
         {
-            UnitController unit = GetUnitAtCoord(boardCoord);
-            OpenInfo(unit);
+            activeUnit = GetUnitAtCoord(boardCoord);
+            OpenInfo(activeUnit);
         }
     }
 
@@ -159,7 +70,7 @@ public class GameBoardController : Controller<GameBoardView, GameBoardModel>
         if (unitToBePlaced != null)
         {
             Rect areaOfInterest = new Rect(GetBoardRelativePositionFromCoords(boardCoord), GetPxelSizeFromUnitSize(unitToBePlaced.SizeByUnit));
-            if (CheckAreaIsAvailable(boardCoord, unitToBePlaced.SizeByUnit))
+            if (CheckAreaIsAvailable(new RectInt(boardCoord, unitToBePlaced.SizeByUnit)))
             {
                 View.FeedbackOnArea(areaOfInterest,Color.green);
             }
@@ -170,113 +81,110 @@ public class GameBoardController : Controller<GameBoardView, GameBoardModel>
         }
     }
 
-    public Path<Tile_Vector2Int<UnitController>> FindShortestPath(Tile_Vector2Int<UnitController> startPoint, Tile_Vector2Int<UnitController> destination)
-    {
-        Path<Tile_Vector2Int<UnitController>> path;
-        //AStar Shortest Path
-        var graph = new GraphDataStruct_Vector2IntBoard<UnitController>(ref gameBoard);
-        path = AStar.FindPath(graph, startPoint, destination, DistanceFunction, HeuristicFunction);
-
-        //Dijkstra Shortest Path
-        //path = Dijkstra.FindPath(graph, startPoint, destination, DistanceFunction);
-
-        return path;
-    }
-
-    private double DistanceFunction(Tile_Vector2Int<UnitController> tile1, Tile_Vector2Int<UnitController> tile2)
-    {
-        //For diagonal neigbours all distances should be equal.
-        return 1;
-    }
-
-    private double HeuristicFunction(Tile_Vector2Int<UnitController> tile1, Tile_Vector2Int<UnitController> tile2)
-    {
-        return Vector2Int.Distance(tile1.position, tile2.position);
-    }
-
-    void OpenInfo(UnitController unit)
-    {
-        Redirect(Constants.Events.ShowUnitInfo, Constants.Controllers.InfoController, new Events.GetInfoUnitEventArgs(unit));
-    }
-
-
-
-
     protected override void OnActionRedirected(IController source, string actionName, EventArgs data)
     {
-        if (actionName == Constants.Events.AddUnit)
+        switch(actionName)
         {
-            var unitEventArgs = data as Events.AddUnitEventArgs;
-            if (unitEventArgs?.unit != null)
-            {
-                SetUnitPixelSize(unitEventArgs.unit);
-            }
-
-            switch (unitEventArgs.Method)
-            {
-                case Events.AddUnitEventArgs.UnitAddMethod.SpawnByPositionSelection:
-                    unitToBePlaced = unitEventArgs.unit;
-                    break;
-                case Events.AddUnitEventArgs.UnitAddMethod.Spawn_AtPos:
-                    PlaceUnit(unitEventArgs.unit, unitEventArgs.position);
-                    break;
-                case Events.AddUnitEventArgs.UnitAddMethod.Spawn_AtRandomPos:
-                    if(Tile_Vector2Int<UnitController>.OccupiedTile>0)
-                    {
-                        Vector2Int positionToPlace;
-                        GetAvailableAreaOnBoard(out positionToPlace,unitEventArgs.unit.SizeByUnit,20);
-                        PlaceUnit(unitEventArgs.unit, positionToPlace);
-                    }
-                    break;
-                case Events.AddUnitEventArgs.UnitAddMethod.Spawn_AtRandomPosAroundUnit:
-                    var spawnerUnit= source as UnitController;
-                    var spawnArea = GetTilePositionsAroundUnit(spawnerUnit);
-                    PlaceUnit(unitEventArgs.unit, spawnArea[UnityEngine.Random.Range(0,spawnArea.Count)]);
-
-                    break;
-            }
+            case Constants.Events.AddUnit:
+                AddUnit(source,data as Events.AddUnitEventArgs);
+                break;
+            case Constants.Events.PerformOperation:
+                HandleUnitOperations(data as Events.OperationEvent);
+                break;
         }
-        //else 
-        //if(actionName == Constants.Operations.SpawnSoldier)
-        //{
-        //    //TODO: Builder tasarlanacak (ViewManager?)
-        //    Events.OperationEventArgs operationEventArgs = data as Events.OperationEventArgs;
 
-        //    SoldierUnitController soldierController = new SoldierUnitController(new UnitModel(View.soldierData));
-        //    SetUnitPixelSize(soldierController);
-
-        //    Vector2Int candidateSpawnPoint;
-        //    do
-        //    {
-        //        if (occupiedTile >= TotalTile)
-        //        {
-        //            Debug.LogError("Lack of space! "+ occupiedTile+ "  "+TotalTile);
-        //        }
-        //        candidateSpawnPoint = new Vector2Int(UnityEngine.Random.Range(0, Model.CurrentData.tileNum.x), UnityEngine.Random.Range(0, Model.CurrentData.tileNum.y));
-        //    }
-        //    while ((occupiedTile < TotalTile) && !PlaceUnit(soldierController, candidateSpawnPoint));
-
-
-        //}
     }
 
 
-    //TODO:kdTree may solve this
-    bool GetAvailableAreaOnBoard(out Vector2Int result, Vector2Int dimension,uint ttl)
+    #region GameboardEvents
+    void AddUnit(IController source, Events.AddUnitEventArgs e)
     {
-        Vector2Int candidateSpawnPoint = new Vector2Int(UnityEngine.Random.Range(0, Model.CurrentData.tileNum.x), UnityEngine.Random.Range(0, Model.CurrentData.tileNum.y));
-        if (CheckAreaIsAvailable(candidateSpawnPoint, dimension))
+        if (e == null) return;
+        if (e.unit != null)
         {
-            result = candidateSpawnPoint;
-            return true;
+            View.AddInstanceToPlayground(e.unit.View.rectTransform);
+            SetUnitPixelSize(e.unit);
         }
-        ttl--;
-        if (ttl > 0)
-            return GetAvailableAreaOnBoard(out result,dimension, ttl);
-        result = Vector2Int.zero;
-        return false;
+        switch (e.method)
+        {
+            case Events.AddUnitEventArgs.UnitAddMethod.SpawnByPositionSelection:
+                unitToBePlaced = e.unit;
+                break;
+            case Events.AddUnitEventArgs.UnitAddMethod.Spawn_AtPos:
+                TryPlaceUnit(e.unit, GetBoardCoordsFromRelativePosition(View.CalculateRelativePos(e.position)));
+                break;
+            case Events.AddUnitEventArgs.UnitAddMethod.Spawn_AtRandomPos:
+                if (Tile_Vector2Int<UnitController>.OccupiedTile > 0)
+                {
+                    Vector2Int positionToPlace;
+                    if (GetAvailableAreaOnBoard(out positionToPlace, e.unit.SizeByUnit, 20))
+                        TryPlaceUnit(e.unit, positionToPlace);
+                    else
+                        e.unit.Abandon();
+                }
+                break;
+            case Events.AddUnitEventArgs.UnitAddMethod.Spawn_AtRandomPosAroundUnit:
+                var spawnerUnit = source as UnitController;
+                var spawnArea = GetTilePositionsAroundUnit(spawnerUnit);
+                if (spawnArea.Count > 0)
+                    TryPlaceUnit(e.unit, spawnArea[UnityEngine.Random.Range(0, spawnArea.Count)]);
+                else
+                    e.unit.Abandon();
+                break;
+        }
     }
 
+
+    public void HandleUnitOperations(Events.OperationEvent e)
+    {
+        if (e == null) return;
+
+        switch(e.operation.command)
+        {
+            case Constants.Operations.Move:
+                var moveEvent = e as Events.MoveOperationEvent;
+                if (moveEvent != null)
+                {
+                    Vector2Int moveTargetCorrd = GetBoardCoordsFromRelativePosition(View.CalculateRelativePos(moveEvent.position));
+                    View.StartCoroutine(MoveUnit(e.unit, moveTargetCorrd));
+                }
+                else
+                {
+                    candidateUnitToMove = e.unit;
+                }
+                break;
+        }
+
+
+
+    }
+
+    IEnumerator MoveUnit(UnitController unit, Vector2Int targetCoord)
+    {
+        var path = FindShortestPath(new Tile_Vector2Int<UnitController>(unit,unit.PositionByUnit), new Tile_Vector2Int<UnitController>(null, targetCoord));
+
+        while (path.Count>0)
+        {
+            var nextTile = path.Dequeue();
+            if (nextTile.Holder != null)
+            {
+                path = FindShortestPath(new Tile_Vector2Int<UnitController>(unit, unit.PositionByUnit), new Tile_Vector2Int<UnitController>(null, targetCoord));
+                nextTile = path.Dequeue();
+            }
+
+            //Debug.Log(nextTile);
+
+            RemoveUnit(new RectInt(candidateUnitToMove.PositionByUnit, candidateUnitToMove.SizeByUnit));
+            PlaceUnit(candidateUnitToMove,nextTile.position);
+            yield return new WaitForFixedUpdate();
+        }
+
+        yield return null;
+
+
+    }
+
+    #endregion
 
 
 }

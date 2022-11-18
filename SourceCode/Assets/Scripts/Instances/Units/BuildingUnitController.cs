@@ -8,15 +8,17 @@ public class BuildingUnitController : UnitController
     {
     }
 
-    public override void PerformOperation(Operation op)
+    public override void PerformOperation(Events.OperationEvent e)
     {
-        switch (op.operation)
+        switch (e.operation.command)
         {
-            case Constants.Operations.SpawnSoldier:
+            case Constants.Operations.SpawnAgent:
 
-                SoldierUnitController soldierController = new SoldierUnitController(new UnitModel(Model.CurrentData.spawns[(int)op.amount]));
+                uint spawnAgentLevel = (uint)e.operation.amount - 1;
 
-                Redirect(Constants.Events.AddUnit, Constants.Controllers.GameBoardController, new Events.AddRandomUnitEventArgs(this));
+                var agent = InstanceManager.Instance.CreateAgent(Model.CurrentData.spawns[spawnAgentLevel]);
+
+                Redirect(Constants.Events.AddUnit, Constants.Controllers.GameBoardController, new Events.AddRandomUnitEventArgs(agent));
 
                 break;
         }

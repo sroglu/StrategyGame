@@ -10,12 +10,9 @@ public class GameBoardView : View<GameBoardModel>, IPointerClickHandler
     [Header("GameData")]
     [SerializeField]
     GameBoardData boardData;
-    [SerializeField]
-    public UnitData soldierData;
-
 
     [SerializeField]
-    GridLayoutGroup playground;
+    GridLayoutGroup gameBoard;
     [SerializeField]
     Grid tilePrefab;
     [SerializeField]
@@ -39,7 +36,7 @@ public class GameBoardView : View<GameBoardModel>, IPointerClickHandler
     protected override void OnCreate()
     {
         //RectTransform of the playground could be needed later.
-        playgroundRT = playground.GetComponent<RectTransform>();
+        playgroundRT = gameBoard.GetComponent<RectTransform>();
         feedbackImageRT=feedbackImage.GetComponent<RectTransform>();
 
         boardData.playgroundArea = rectTransform.rect.size;
@@ -48,7 +45,7 @@ public class GameBoardView : View<GameBoardModel>, IPointerClickHandler
 
 
         
-        playground.cellSize = Model.CurrentData.tileSize;
+        gameBoard.cellSize = Model.CurrentData.tileSize;
 
         for (int i = 0; i < Model.CurrentData.tileNum.x* Model.CurrentData.tileNum.y; i++)
         {
@@ -76,21 +73,21 @@ public class GameBoardView : View<GameBoardModel>, IPointerClickHandler
     {
         Controller.OnClickOnBoard(CalculateRelativePos(eventData.position));
     }
-
-    void FixedUpdate()
+    protected override void OnHover(Vector2 cursorPosition)
     {
-        if (Pointer.current.delta.ReadValue().magnitude > 0)
-        {
-            Controller.OnMoveOnBoard(CalculateRelativePos(Pointer.current.position.ReadValue()));
-        }
-
+        Controller.OnMoveOnBoard(CalculateRelativePos(cursorPosition));
     }
 
-    Vector2 CalculateRelativePos(Vector2 pointerPos)
+    public Vector2 CalculateRelativePos(Vector2 pointerPos)
     {
-        Vector2 relativeClickPos = (Vector2)transform.InverseTransformPoint(pointerPos + new Vector2(rectTransform.rect.width / 2, rectTransform.rect.height / 2));
-        relativeClickPos = new Vector2(relativeClickPos.x, rectTransform.rect.height - relativeClickPos.y);
-        return relativeClickPos;
+        Vector2 relativePos = (Vector2)transform.InverseTransformPoint(pointerPos + new Vector2(rectTransform.rect.width / 2, rectTransform.rect.height / 2));
+        relativePos = new Vector2(relativePos.x, rectTransform.rect.height - relativePos.y);
+        return relativePos;
+    }
+
+    public void AddInstanceToPlayground(RectTransform instanceTransform)
+    {
+        instanceTransform.parent = InstanceManager.Instance.transform;
     }
 
 
@@ -98,4 +95,5 @@ public class GameBoardView : View<GameBoardModel>, IPointerClickHandler
     {
 
     }
+
 }

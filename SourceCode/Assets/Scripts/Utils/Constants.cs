@@ -8,11 +8,13 @@ namespace Constants
     {
         public const string AddUnit = "unit.add";
         public const string ShowUnitInfo = "unit.info";
+        public const string PerformOperation = "unit.operation";
     }
 
     public static class Operations
     {
-        public const string SpawnSoldier = "operation.spawn.soldier";
+        public const string SpawnAgent = "operation.spawn.agent";
+        public const string Move = "operation.move";
         public const string DealDamage = "operation.damage";
     }
     public static class Effects

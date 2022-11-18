@@ -37,6 +37,7 @@ public class InfoController : Controller<InfoView, InfoModel>
 
     public void PerformOperation(Operation op)
     {
-        activeUnit?.PerformOperation(op);
+        var e = new Events.OperationEvent(activeUnit,op);
+        activeUnit?.PerformOperation(e);
     }
 }

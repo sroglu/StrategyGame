@@ -88,13 +88,11 @@ public class InfoView : View<InfoModel>
         foreach (var operation in Model.CurrentData.operations)
         {
             var operationButton = GameObject.Instantiate(operationButtonPrefab, operationListScroll.content);
-
             operationButton.mButton.onClick.AddListener(() => Controller.PerformOperation(operation));
             operationButton.mButtonText.text = operation.name;
 
             opButtonsList.Add(operationButton);
         }
-
 
         operationTitle.text = opButtonsList.Count > 0 ? operationTitleText : "";
 

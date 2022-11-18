@@ -22,6 +22,8 @@ public class GamePageController : Controller<GamePageView, GamePageModel>
         productionController = new ProductionController(View.productionView.Model, View.productionView);
         infoController = new InfoController(View.infoView.Model, View.infoView);
 
+        InstanceManager.Instance.ClearAllInstances();
+
     }
 
 

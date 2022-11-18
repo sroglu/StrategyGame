@@ -110,6 +110,7 @@ public class Controller<V, M> : ControllerBase where V : ViewBase where M : IMod
     {
         OnDestroy();
         Model.Dispose();
+        View.Dispose();
     }
 
     protected virtual void OnCreate() { }

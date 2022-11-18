@@ -16,7 +16,7 @@ public interface IView
 }
 
 [RequireComponent(typeof(RectTransform))]
-public abstract class ViewBase : MonoBehaviour, IView, IPointerEnterHandler, IPointerExitHandler
+public abstract class ViewBase : MonoBehaviour, IView, IDisposable, IPointerEnterHandler, IPointerExitHandler
 {
     public enum ViewState
     {
@@ -31,7 +31,6 @@ public abstract class ViewBase : MonoBehaviour, IView, IPointerEnterHandler, IPo
     public UnityAction<ViewState> StateChanged;
     public static UnityAction<CustomActionEventType, InputAction.CallbackContext, GameObject> ActionPerformed;
 
-
     RectTransform _rectTransform;
     public RectTransform rectTransform { get { if (_rectTransform == null) _rectTransform = GetComponent<RectTransform>(); return _rectTransform; } }
     public bool IsOpen { get { return gameObject.activeInHierarchy; } }
@@ -44,9 +43,6 @@ public abstract class ViewBase : MonoBehaviour, IView, IPointerEnterHandler, IPo
 
     public Vector2 GetAnchoredPosition(Vector2 anchor)
     {
-        //return new Vector2(
-        //    ((anchor - rectTransform.pivot).x * rectTransform.rect.width /*+ rectTransform.position.x*/) / Screen.width+rectTransform.position.normalized.x,
-        //    ((anchor - rectTransform.pivot).y * rectTransform.rect.height /*+ rectTransform.position.y*/) / Screen.height + rectTransform.position.normalized.y);
         return new Vector2(
             ((anchor - rectTransform.pivot).x * rectTransform.rect.width + rectTransform.position.x) / Screen.width,
             ((anchor - rectTransform.pivot).y * rectTransform.rect.height + rectTransform.position.y) / Screen.height);
@@ -70,14 +66,14 @@ public abstract class ViewBase : MonoBehaviour, IView, IPointerEnterHandler, IPo
 
     protected virtual void OnCreate() { }
     protected virtual void OnRemove() { }
+    protected virtual void OnDestroyInstance() { }
     protected virtual void OnStateChanged(ViewState state) { }
+    protected virtual void OnHover(Vector2 cursorPosition) { }
     protected virtual void OnCustomInputAction(CustomActionEventType actionType, InputAction.CallbackContext evArgs, GameObject targetObj) { }
 
     //Public Methods
     public virtual void Init(IController controller) { }
     public abstract void UpdateView();
-
-
 
     public void Hide()
     {
@@ -97,6 +93,19 @@ public abstract class ViewBase : MonoBehaviour, IView, IPointerEnterHandler, IPo
     {
         IsPointerOn = false;
     }
+
+    void FixedUpdate()
+    {
+        if (IsPointerOn)
+        {
+            OnHover(Pointer.current.position.ReadValue());
+        }
+    }
+    public void Dispose()
+    {
+        Destroy(gameObject);
+    }
+    public void DestroyInstance() { }
 }
 
 
@@ -120,4 +129,9 @@ public abstract class View<M> : ViewBase where M : ModelBase
     }
 
     protected virtual void OnInit(){}
+
+    protected sealed override void OnDestroyInstance()
+    {
+        Controller.Dispose();
+    }
 }

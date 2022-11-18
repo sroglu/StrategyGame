@@ -13,10 +13,9 @@ MonoBehaviour:
   m_Name: Tower
   m_EditorClassIdentifier: 
   unitName: Tower
-  image: {fileID: 5941692644972581116, guid: 15417a1c2d9838047994bcb14e686563, type: 3}
   dimensions: {x: 1, y: 2}
-  type: 2
-  spawnFrom: 0
+  type: 1
+  spawns: []
   propertyData:
     title: Tower
     description: Attacks enemy units nearby.

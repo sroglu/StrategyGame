@@ -5,7 +5,7 @@ using System;
 public class Operation
 {
     public string name;
-    public string operation;
+    public string command;
     public float amount;
 }
 

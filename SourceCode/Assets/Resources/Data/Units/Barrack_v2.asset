@@ -13,19 +13,20 @@ MonoBehaviour:
   m_Name: Barrack_v2
   m_EditorClassIdentifier: 
   unitName: Barrack 2
-  image: {fileID: 8336996321327794631, guid: 15417a1c2d9838047994bcb14e686563, type: 3}
   dimensions: {x: 4, y: 4}
   type: 1
-  spawnFrom: 0
+  spawns:
+  - {fileID: 11400000, guid: ce495a2b4b566684485c36395a686b9d, type: 2}
+  - {fileID: 11400000, guid: 3f468da07f202104fb28ec938468eed1, type: 2}
   propertyData:
     title: Barrack 2
     description: It can produce soldiers.
     image: {fileID: 8336996321327794631, guid: 15417a1c2d9838047994bcb14e686563, type: 3}
     operations:
     - name: Spawn Soldier
-      operation: operation.spawn.soldier
+      command: operation.spawn.agent
       amount: 1
     - name: Spawn Soldier 2
-      operation: operation.spawn.soldier
+      command: operation.spawn.agent
       amount: 2
     effects: []

@@ -13,20 +13,19 @@ MonoBehaviour:
   m_Name: Soldier_v3
   m_EditorClassIdentifier: 
   unitName: Soldier
-  image: {fileID: -5016416793089130713, guid: ceb0cd61341aceb488d9fb3bf477f3bc, type: 3}
   dimensions: {x: 1, y: 1}
-  type: 3
-  spawnFrom: 1
+  type: 2
+  spawns: []
   propertyData:
     title: Soldier Lv3
     description: Unit that goes where you click.
     image: {fileID: -341625342537043367, guid: 15417a1c2d9838047994bcb14e686563, type: 3}
     operations:
     - name: Move
-      operation: operation.move
-      amount: 0
+      command: operation.damage
+      amount: 1
     - name: Deal Damage
-      operation: operation.damage
+      command: operation.damage
       amount: 30
     effects:
     - name: Engage Enemy

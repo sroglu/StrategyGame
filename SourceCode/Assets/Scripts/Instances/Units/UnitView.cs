@@ -29,12 +29,17 @@ public class UnitView : View<UnitModel>
     {
     }
 
-    private void Update()
+    public void Place(RectTransform parent, Vector2 position, Vector2 anchoredMin, Vector2 anchoredMax)
     {
-        if (Controller.SnapToPointer)
-        {
-            rectTransform.anchoredPosition = Pointer.current.position.ReadValue();
-        }
+        rectTransform.parent = parent;
+        rectTransform.anchorMin = anchoredMin;
+        rectTransform.anchorMax = anchoredMax;
+        rectTransform.anchoredPosition = position;
+    }
+
+    public void FollowCursor()
+    {
+        rectTransform.anchoredPosition = Pointer.current.position.ReadValue();
     }
 
 }
