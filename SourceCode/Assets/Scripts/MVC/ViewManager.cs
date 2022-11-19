@@ -1,18 +1,12 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
-using UnityEngine.UI;
 
 [RequireComponent(typeof(Canvas))]
 public class ViewManager : MonoBehaviour
 {
-
     private static ViewManager _instance;
     public static ViewManager Instance
     {
@@ -93,6 +87,9 @@ public class ViewManager : MonoBehaviour
     #region ViewMethods
     public T CreateInstanceView<T>() where T : ViewBase
     {
+        if (typeof(T) == typeof(EmptyView))
+            return new GameObject().AddComponent(typeof(EmptyView)) as T;
+
         foreach (var instancePrefab in instancePrefabs)
         {
             if (instancePrefab is T tInstancePrefab)
@@ -100,7 +97,7 @@ public class ViewManager : MonoBehaviour
                 return GameObject.Instantiate(tInstancePrefab);
             }
         }
-        return new GameObject().AddComponent(typeof(EmptyView)) as T;
+        return null;
     }
 
     public static T GetPageView<T>() where T : ViewBase
@@ -110,7 +107,7 @@ public class ViewManager : MonoBehaviour
             if (Instance.pageViews[i] is T tPageView)
                 return tPageView;
         }
-        return new GameObject().AddComponent(typeof(EmptyView)) as T;
+        return null;
     }
 
     public static void ShowPageView<T>(bool remember = true) where T : ViewBase

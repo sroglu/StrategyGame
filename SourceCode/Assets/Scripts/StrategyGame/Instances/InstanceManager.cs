@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class InstanceManager : MonoBehaviour
@@ -30,8 +28,6 @@ public class InstanceManager : MonoBehaviour
             instance.DestroyInstance();
         }
     }
-
-
     public UnitController CreateBuilding(UnitData unitData)
     {
         return new BuildingUnitController(new UnitModel(unitData));

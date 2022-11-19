@@ -1,0 +1,20 @@
+{
+    "name": "mehmetsrl.StrategyGame",
+    "rootNamespace": "",
+    "references": [
+        "GUID:75469ad4d38634e559750d17036d5f7c",
+        "GUID:f18337be310b33546b933150953a844d",
+        "GUID:92ba89c6a6ea53f40be949958cb872af",
+        "GUID:34c170bd19fd182468624cd3c51c2183",
+        "GUID:82ccec145bf629a4b8aa7ea2f81720d3"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

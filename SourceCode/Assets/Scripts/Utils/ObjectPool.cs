@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace mehmetsrl.Utils.Pool
+namespace mehmetsrl.Utils.DesignPatterns
 {
 
     public struct PooledObject<T> : IDisposable where T : class
