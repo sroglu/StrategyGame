@@ -9,6 +9,19 @@ public partial class GameBoardController : Controller<GameBoardView, GameBoardMo
     #region UtilityFunctions
 
     //Board Functions
+    //Generic Functions
+    void CreateGameBoard()
+    {
+        gameBoard = new Tile_Vector2Int<UnitController>[Model.CurrentData.tileNum.x, Model.CurrentData.tileNum.y];
+        for (int x = 0; x < gameBoard.GetLength(0); x++)
+        {
+            for (int y = 0; y < gameBoard.GetLength(1); y++)
+            {
+                gameBoard[x, y] = new Tile_Vector2Int<UnitController>(null, new Vector2Int(x, y));
+            }
+
+        }
+    }
     public Vector2Int GetBoardCoordsFromRelativePosition(Vector2 pointerRelativePosition)
     {
         return new Vector2Int((int)(pointerRelativePosition.x / Model.CurrentData.tileSize.x), (int)(pointerRelativePosition.y / Model.CurrentData.tileSize.y));
@@ -21,7 +34,6 @@ public partial class GameBoardController : Controller<GameBoardView, GameBoardMo
     {
         return new Vector2(size.x * Model.CurrentData.tileSize.x, size.y * Model.CurrentData.tileSize.y);
     }
-
     bool CheckAreaIsAvailable(RectInt area)
     {
         //Calculate upper bounds
@@ -32,7 +44,7 @@ public partial class GameBoardController : Controller<GameBoardView, GameBoardMo
             {
                 for (int y = area.y; y < area.y + area.height; y++)
                 {
-                    if (GetUnitAtCoord(new Vector2Int(x, y)) != null)
+                    if (gameBoard[x, y].Holder != null)
                         return false;
                 }
             }
@@ -40,29 +52,33 @@ public partial class GameBoardController : Controller<GameBoardView, GameBoardMo
         }
         return false;
     }
-    /*
-    bool CheckAreaIsAvailable(Vector2Int pivot, Vector2Int size)
+    List<Vector2Int> GetTilePositionsAroundArea(RectInt area, uint range = 1)
     {
-        //Calculate upper bounds
-        var upperBound = pivot + size;
+        var result = new List<Vector2Int>();
 
-        for (int i = 0; i < size.x; i++)
+        for (int x = (int)(area.x - range); x < area.x + area.width + range; x++)
         {
-            for (int j = 0; j < size.y; j++)
+            for (int y = (int)(area.y - range); y < area.y + area.height + range; y++)
             {
-                //Check candidate building within the bounds
-                if (pivot.x >= 0 && pivot.y >= 0 && upperBound.x <= gameBoard.GetLength(0) && upperBound.y <= gameBoard.GetLength(1))
+                //Skip area that spawner unit placed
+                if (x >= area.x && x < area.x + area.width &&
+                    y >= area.y && y < area.y + area.height)
                 {
-                    if (GetUnitAtCoord(new Vector2Int(pivot.x + i, pivot.y + j)) != null)
-                        return false;
+                    continue;
                 }
-                else
-                    return false;
+
+                Vector2Int candidateTileCoords = new Vector2Int(x, y);
+                if (CheckAreaIsAvailable(new RectInt(candidateTileCoords, Vector2Int.one)))
+                {
+                    result.Add(candidateTileCoords);
+                }
             }
         }
-        return true;
+
+        return result;
     }
-    */
+
+    //Unit Functions
     public UnitController GetUnitAtCoord(Vector2Int coord)
     {
         if (coord.x >= 0 && coord.x < gameBoard.GetLength(0) && coord.y >= 0 && coord.y < gameBoard.GetLength(1))
@@ -76,7 +92,6 @@ public partial class GameBoardController : Controller<GameBoardView, GameBoardMo
             {
                 Vector2Int setCoords = new Vector2Int(coords.x + i, coords.y + j);
                 gameBoard[setCoords.x, setCoords.y].Holder = unitToPlace;
-                occupiedTile++;
             }
 
     }
@@ -90,7 +105,6 @@ public partial class GameBoardController : Controller<GameBoardView, GameBoardMo
         }
         return false;
     }
-
     public bool TryRemoveUnit(UnitController unit)
     {
         RectInt areaToRemove = new RectInt(unit.PositionByUnit, unit.SizeByUnit);
@@ -105,13 +119,11 @@ public partial class GameBoardController : Controller<GameBoardView, GameBoardMo
         RemoveUnit(areaToRemove);
         return true;
     }
-
     void PlaceUnit(UnitController unit, Vector2Int coords)
     {
         OccupyUnitTilesOnBoard(unit, coords);
         unit.PlaceTo(View.rectTransform, coords, GetBoardRelativePositionFromCoords(coords), Vector2.up, Vector2.up);
     }
-
     void RemoveUnit(RectInt areaToRemove)
     {
         for (int x = areaToRemove.x; x < areaToRemove.x + areaToRemove.width; x++)
@@ -122,14 +134,32 @@ public partial class GameBoardController : Controller<GameBoardView, GameBoardMo
             }
         }
     }
-
-
     public void SetUnitPixelSize(UnitController unit)
     {
         unit.SetPixelSize(
                     new Vector2(
                         unit.SizeByUnit.x * Model.CurrentData.tileSize.x,
                         unit.SizeByUnit.y * Model.CurrentData.tileSize.y));
+    }
+    IEnumerator MoveUnit(UnitController unit, Vector2Int targetCoord)
+    {
+        var path = FindShortestPath(new Tile_Vector2Int<UnitController>(unit, unit.PositionByUnit), new Tile_Vector2Int<UnitController>(null, targetCoord));
+
+        while (path.Count > 0)
+        {
+            var nextTile = path.Dequeue();
+            if (nextTile.Holder != null)
+            {
+                path = FindShortestPath(new Tile_Vector2Int<UnitController>(unit, unit.PositionByUnit), new Tile_Vector2Int<UnitController>(null, targetCoord));
+                nextTile = path.Dequeue();
+            }
+
+            RemoveUnit(new RectInt(unit.PositionByUnit, unit.SizeByUnit));
+            PlaceUnit(unit, nextTile.position);
+            yield return new WaitForFixedUpdate();
+        }
+
+        yield return null;
     }
 
     //TODO:kdTree may solve GetAvailableAreaOnBoard issue
@@ -170,7 +200,6 @@ public partial class GameBoardController : Controller<GameBoardView, GameBoardMo
                 }
             }
         }
-
         return result;
     }
 
@@ -191,17 +220,11 @@ public partial class GameBoardController : Controller<GameBoardView, GameBoardMo
     {
         //For diagonal neigbours all distances should be equal.
         return 1;
-        //return Vector2Int.Distance(tile1.position, tile2.position);
     }
 
     private double HeuristicFunction(Tile_Vector2Int<UnitController> tile1, Tile_Vector2Int<UnitController> tile2)
     {
         return Vector2Int.Distance(tile1.position, tile2.position);
-    }
-
-    void OpenInfo(UnitController unit)
-    {
-        Redirect(Constants.Events.ShowUnitInfo, Constants.Controllers.InfoController, new Events.GetInfoUnitEventArgs(unit));
     }
 
     #endregion

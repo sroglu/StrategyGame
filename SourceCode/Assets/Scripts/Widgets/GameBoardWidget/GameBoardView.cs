@@ -71,11 +71,10 @@ public class GameBoardView : View<GameBoardModel>, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        Controller.OnClickOnBoard(CalculateRelativePos(eventData.position));
-    }
-    protected override void OnHover(Vector2 cursorPosition)
-    {
-        Controller.OnMoveOnBoard(CalculateRelativePos(cursorPosition));
+        if(eventData.button==PointerEventData.InputButton.Left)
+            Controller.OnClickOnBoard(CalculateRelativePos(eventData.position));
+        else if(eventData.button==PointerEventData.InputButton.Right)
+            Controller.OnRightClickOnBoard(CalculateRelativePos(eventData.position));
     }
 
     public Vector2 CalculateRelativePos(Vector2 pointerPos)
@@ -89,7 +88,6 @@ public class GameBoardView : View<GameBoardModel>, IPointerClickHandler
     {
         instanceTransform.parent = InstanceManager.Instance.transform;
     }
-
 
     public override void UpdateView()
     {

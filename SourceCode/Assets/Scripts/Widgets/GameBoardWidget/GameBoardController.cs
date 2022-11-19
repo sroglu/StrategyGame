@@ -4,36 +4,30 @@ using mehmetsrl.Algorithms.Graph;
 using System.Collections.Generic;
 using mehmetsrl.Algorithms.DataStructures;
 using System.Collections;
+using UnityEngine.InputSystem;
+using UnityEngine.EventSystems;
+using UnityEngine.Events;
 
 public partial class GameBoardController : Controller<GameBoardView, GameBoardModel>
 {
     Tile_Vector2Int<UnitController>[,] gameBoard;
-    uint occupiedTile =0;
-    uint TotalTile { get { return (uint)(gameBoard.GetLength(0) * gameBoard.GetLength(1)); } }
     public GameBoardController(GameBoardModel model,GameBoardView view) : base(ControllerType.instance, model, view)
     {
     }
     protected override void OnCreate()
     {
-        gameBoard = new Tile_Vector2Int<UnitController>[Model.CurrentData.tileNum.x, Model.CurrentData.tileNum.y];
-        for (int x = 0; x < gameBoard.GetLength(0); x++)
-        {
-            for (int y = 0; y < gameBoard.GetLength(1); y++)
-            {
-                gameBoard[x, y] = new Tile_Vector2Int<UnitController>(null,new Vector2Int(x,y));
-            }
-
-        }
+        CreateGameBoard();
     }
 
-    UnitController activeUnit,unitToBePlaced,candidateUnitToMove;
+    UnitController activeUnit;
+    RectInt projectionArea;
 
     public void OnRightClickOnBoard(Vector2 viewRelativePosition)
     {
-        if (unitToBePlaced != null)
+        Vector2Int boardCoord = GetBoardCoordsFromRelativePosition(viewRelativePosition);
+        if (actionsWaitingRightClickEvent.Count > 0)
         {
-            unitToBePlaced.Abandon();
-            unitToBePlaced = null;
+            actionsWaitingRightClickEvent.Dequeue()?.Invoke(boardCoord);
         }
         else if (activeUnit != null)
         {
@@ -45,17 +39,9 @@ public partial class GameBoardController : Controller<GameBoardView, GameBoardMo
     {
         Vector2Int boardCoord = GetBoardCoordsFromRelativePosition(viewRelativePosition);
 
-        if (unitToBePlaced != null)
+        if (actionsWaitingLeftClickEvent.Count > 0)
         {
-            if (TryPlaceUnit(unitToBePlaced, boardCoord))
-            {
-                OpenInfo(unitToBePlaced);
-                unitToBePlaced = null;
-                View.EndFeedback();
-            }
-        }else if (candidateUnitToMove != null)
-        {
-            View.StartCoroutine(MoveUnit(candidateUnitToMove, boardCoord));
+            actionsWaitingLeftClickEvent.Dequeue()?.Invoke(boardCoord);
         }
         else
         {
@@ -64,21 +50,9 @@ public partial class GameBoardController : Controller<GameBoardView, GameBoardMo
         }
     }
 
-    public void OnMoveOnBoard(Vector2 viewRelativePosition)
+    void OpenInfo(UnitController unit)
     {
-        Vector2Int boardCoord = GetBoardCoordsFromRelativePosition(viewRelativePosition);
-        if (unitToBePlaced != null)
-        {
-            Rect areaOfInterest = new Rect(GetBoardRelativePositionFromCoords(boardCoord), GetPxelSizeFromUnitSize(unitToBePlaced.SizeByUnit));
-            if (CheckAreaIsAvailable(new RectInt(boardCoord, unitToBePlaced.SizeByUnit)))
-            {
-                View.FeedbackOnArea(areaOfInterest,Color.green);
-            }
-            else
-            {
-                View.FeedbackOnArea(areaOfInterest, Color.red);
-            }
-        }
+        Redirect(Constants.Events.ShowUnitInfo, Constants.Controllers.InfoController, new Events.GetInfoUnitEventArgs(unit));
     }
 
     protected override void OnActionRedirected(IController source, string actionName, EventArgs data)
@@ -92,11 +66,13 @@ public partial class GameBoardController : Controller<GameBoardView, GameBoardMo
                 HandleUnitOperations(data as Events.OperationEvent);
                 break;
         }
-
     }
 
-
     #region GameboardEvents
+
+    Queue<UnityAction<Vector2Int>> actionsWaitingLeftClickEvent = new Queue<UnityAction<Vector2Int>>();
+    Queue<UnityAction<Vector2Int>> actionsWaitingRightClickEvent = new Queue<UnityAction<Vector2Int>>();
+
     void AddUnit(IController source, Events.AddUnitEventArgs e)
     {
         if (e == null) return;
@@ -108,7 +84,24 @@ public partial class GameBoardController : Controller<GameBoardView, GameBoardMo
         switch (e.method)
         {
             case Events.AddUnitEventArgs.UnitAddMethod.SpawnByPositionSelection:
-                unitToBePlaced = e.unit;
+                projectionArea = new RectInt(Vector2Int.zero,e.unit.SizeByUnit);
+                View.StartCoroutine(ShowFeedbackOnGameBoard());
+
+                actionsWaitingLeftClickEvent.Enqueue(
+                        new UnityAction<Vector2Int>(
+                        (Vector2Int targetCoord) => 
+                        {
+                            if (TryPlaceUnit(e.unit, targetCoord))
+                            {
+                                OpenInfo(e.unit);
+                            }
+                            else
+                            {
+                                e.unit.Abandon();
+                            }
+                            projectionArea = new RectInt(Vector2Int.zero,Vector2Int.zero);
+                        }
+                        ));
                 break;
             case Events.AddUnitEventArgs.UnitAddMethod.Spawn_AtPos:
                 TryPlaceUnit(e.unit, GetBoardCoordsFromRelativePosition(View.CalculateRelativePos(e.position)));
@@ -118,22 +111,29 @@ public partial class GameBoardController : Controller<GameBoardView, GameBoardMo
                 {
                     Vector2Int positionToPlace;
                     if (GetAvailableAreaOnBoard(out positionToPlace, e.unit.SizeByUnit, 20))
+                    {
                         TryPlaceUnit(e.unit, positionToPlace);
+                    }
                     else
+                    {
                         e.unit.Abandon();
+                    }
                 }
                 break;
             case Events.AddUnitEventArgs.UnitAddMethod.Spawn_AtRandomPosAroundUnit:
                 var spawnerUnit = source as UnitController;
                 var spawnArea = GetTilePositionsAroundUnit(spawnerUnit);
                 if (spawnArea.Count > 0)
+                {
                     TryPlaceUnit(e.unit, spawnArea[UnityEngine.Random.Range(0, spawnArea.Count)]);
+                }
                 else
+                {
                     e.unit.Abandon();
+                }
                 break;
         }
     }
-
 
     public void HandleUnitOperations(Events.OperationEvent e)
     {
@@ -145,46 +145,49 @@ public partial class GameBoardController : Controller<GameBoardView, GameBoardMo
                 var moveEvent = e as Events.MoveOperationEvent;
                 if (moveEvent != null)
                 {
-                    Vector2Int moveTargetCorrd = GetBoardCoordsFromRelativePosition(View.CalculateRelativePos(moveEvent.position));
-                    View.StartCoroutine(MoveUnit(e.unit, moveTargetCorrd));
+                    Vector2Int moveTargetCoord = GetBoardCoordsFromRelativePosition(View.CalculateRelativePos(moveEvent.position));
+                    View.StartCoroutine(MoveUnit(e.unit, moveTargetCoord));
                 }
                 else
                 {
-                    candidateUnitToMove = e.unit;
+                    actionsWaitingLeftClickEvent.Enqueue(
+                        new UnityAction<Vector2Int>(
+                        (Vector2Int targetCoord) =>
+                            View.StartCoroutine(MoveUnit(e.unit, targetCoord))
+                        ));
                 }
                 break;
         }
 
-
-
     }
 
-    IEnumerator MoveUnit(UnitController unit, Vector2Int targetCoord)
-    {
-        var path = FindShortestPath(new Tile_Vector2Int<UnitController>(unit,unit.PositionByUnit), new Tile_Vector2Int<UnitController>(null, targetCoord));
 
-        while (path.Count>0)
+    IEnumerator ShowFeedbackOnGameBoard()
+    {
+        Vector2 relativePos;
+        Rect areaOfInterest;
+        while (projectionArea.size != Vector2Int.zero)
         {
-            var nextTile = path.Dequeue();
-            if (nextTile.Holder != null)
+            relativePos = View.CalculateRelativePos(Pointer.current.position.ReadValue());
+            projectionArea.position = GetBoardCoordsFromRelativePosition(relativePos);
+            areaOfInterest = new Rect(GetBoardRelativePositionFromCoords(projectionArea.position), GetPxelSizeFromUnitSize(projectionArea.size));
+
+            if (CheckAreaIsAvailable(projectionArea))
             {
-                path = FindShortestPath(new Tile_Vector2Int<UnitController>(unit, unit.PositionByUnit), new Tile_Vector2Int<UnitController>(null, targetCoord));
-                nextTile = path.Dequeue();
+                View.FeedbackOnArea(areaOfInterest, Color.green);
+            }
+            else
+            {
+                View.FeedbackOnArea(areaOfInterest, Color.red);
             }
 
-            //Debug.Log(nextTile);
-
-            RemoveUnit(new RectInt(candidateUnitToMove.PositionByUnit, candidateUnitToMove.SizeByUnit));
-            PlaceUnit(candidateUnitToMove,nextTile.position);
             yield return new WaitForFixedUpdate();
         }
-
+        View.EndFeedback();
         yield return null;
-
 
     }
 
+
     #endregion
-
-
 }
