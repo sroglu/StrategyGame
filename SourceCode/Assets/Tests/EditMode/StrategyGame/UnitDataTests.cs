@@ -7,9 +7,7 @@ public class UnitDataTests
     [Test]
     public void UnitDataOperationTest()
     {
-        //var unitObjs = AssetDatabase.LoadAllAssetsAtPath("Assets/Resources/Data/Units");
         var unitObjs = Resources.LoadAll("Data/Units", typeof(UnitData));
-
 
         foreach (var uObj in unitObjs)
         {
@@ -36,7 +34,6 @@ public class UnitDataTests
     [Test]
     public void UnitDataEffectTest()
     {
-        //var unitObjs = AssetDatabase.LoadAllAssetsAtPath("Assets/Resources/Data/Units");
         var unitObjs = Resources.LoadAll("Data/Units", typeof(UnitData));
 
 

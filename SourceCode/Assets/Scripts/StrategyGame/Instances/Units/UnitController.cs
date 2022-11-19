@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
-public abstract class UnitController : Controller<UnitView, UnitModel>
+public class UnitController : Controller<UnitView, UnitModel>
 {
     public Vector2Int PositionByUnit { get; private set; }
     public bool Placed { get; private set; }
@@ -32,7 +32,7 @@ public abstract class UnitController : Controller<UnitView, UnitModel>
         return false;
     }
 
-    public UnitController(UnitModel model) : base(ControllerType.instance, model)
+    public UnitController(UnitModel model,UnitView view=null) : base(ControllerType.instance, model, view)
     {
     }
     public void SetPixelSize(Vector2 size)

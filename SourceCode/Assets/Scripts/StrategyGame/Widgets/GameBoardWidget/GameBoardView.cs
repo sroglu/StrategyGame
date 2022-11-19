@@ -30,7 +30,13 @@ public class GameBoardView : View<GameBoardModel>, IPointerClickHandler
 
     #endregion
 
-
+    public void SetEditorBindings(GameBoardData boardData, GridLayoutGroup gameBoard, Grid tilePrefab, Image feedbackImage)
+    {
+        this.boardData = boardData;
+        this.gameBoard = gameBoard;
+        this.tilePrefab = tilePrefab;
+        this.feedbackImage = feedbackImage;
+    }
 
 
     protected override void OnCreate()

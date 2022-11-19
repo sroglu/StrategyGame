@@ -132,7 +132,7 @@ public partial class GameBoardController : Controller<GameBoardView, GameBoardMo
                 break;
         }
     }
-    public void HandleUnitOperations(Events.OperationEvent e)
+    void HandleUnitOperations(Events.OperationEvent e)
     {
         if (e == null) return;
 

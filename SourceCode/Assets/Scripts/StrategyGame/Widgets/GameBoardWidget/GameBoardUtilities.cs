@@ -14,7 +14,7 @@ public partial class GameBoardController : Controller<GameBoardView, GameBoardMo
 
     //Board Functions
     //Generic Functions
-    void CreateGameBoard()
+    public void CreateGameBoard()
     {
         gameBoard = new Tile_Vector2Int<UnitController>[Model.CurrentData.tileNum.x, Model.CurrentData.tileNum.y];
         for (int x = 0; x < gameBoard.GetLength(0); x++)
@@ -38,7 +38,7 @@ public partial class GameBoardController : Controller<GameBoardView, GameBoardMo
     {
         return new Vector2(size.x * Model.CurrentData.tileSize.x, size.y * Model.CurrentData.tileSize.y);
     }
-    bool CheckAreaIsAvailable(RectInt area)
+    public bool CheckAreaIsAvailable(RectInt area)
     {
         //Calculate upper bounds
         //Check candidate building within the bounds
@@ -56,7 +56,7 @@ public partial class GameBoardController : Controller<GameBoardView, GameBoardMo
         }
         return false;
     }
-    List<Vector2Int> GetTilePositionsAroundArea(RectInt area, uint range = 1)
+    public List<Vector2Int> GetTilePositionsAroundArea(RectInt area, uint range = 1)
     {
         var result = new List<Vector2Int>();
 
@@ -81,7 +81,7 @@ public partial class GameBoardController : Controller<GameBoardView, GameBoardMo
 
         return result;
     }
-    IEnumerator ShowFeedbackOnGameBoard()
+    public IEnumerator ShowFeedbackOnGameBoard()
     {
         Vector2 relativePos;
         Rect areaOfInterest;
@@ -114,7 +114,7 @@ public partial class GameBoardController : Controller<GameBoardView, GameBoardMo
             return gameBoard[coord.x, coord.y].Holder;
         return null;
     }
-    void OccupyUnitTilesOnBoard(UnitController unitToPlace, Vector2Int coords)
+    public void OccupyUnitTilesOnBoard(UnitController unitToPlace, Vector2Int coords)
     {
         for (int i = 0; i < unitToPlace.SizeByUnit.x; i++)
             for (int j = 0; j < unitToPlace.SizeByUnit.y; j++)
@@ -148,12 +148,12 @@ public partial class GameBoardController : Controller<GameBoardView, GameBoardMo
         RemoveUnit(areaToRemove);
         return true;
     }
-    void PlaceUnit(UnitController unit, Vector2Int coords)
+    public void PlaceUnit(UnitController unit, Vector2Int coords)
     {
         OccupyUnitTilesOnBoard(unit, coords);
         unit.PlaceTo(View.rectTransform, coords, GetBoardRelativePositionFromCoords(coords), Vector2.up, Vector2.up);
     }
-    void RemoveUnit(RectInt areaToRemove)
+    public void RemoveUnit(RectInt areaToRemove)
     {
         for (int x = areaToRemove.x; x < areaToRemove.x + areaToRemove.width; x++)
         {
@@ -192,7 +192,7 @@ public partial class GameBoardController : Controller<GameBoardView, GameBoardMo
     }
 
     //TODO:kdTree may solve GetAvailableAreaOnBoard issue
-    bool GetAvailableAreaOnBoard(out Vector2Int result, Vector2Int dimension, uint ttl)
+    public bool GetAvailableAreaOnBoard(out Vector2Int result, Vector2Int dimension, uint ttl)
     {
         Vector2Int candidateSpawnPoint = new Vector2Int(UnityEngine.Random.Range(0, gameBoard.GetLength(0)), UnityEngine.Random.Range(0, gameBoard.GetLength(1)));
         if (CheckAreaIsAvailable(new RectInt(candidateSpawnPoint, dimension)))
@@ -207,11 +207,11 @@ public partial class GameBoardController : Controller<GameBoardView, GameBoardMo
         return false;
     }
 
-    bool IsThereAnyTileLeft()
+    public bool IsThereAnyTileLeft()
     {
         return Tile_Vector2Int<UnitController>.OccupiedTile < gameBoard.GetLength(0) * gameBoard.GetLength(1);
     }
-    Vector2Int GetRandomPositionAround(RectInt area)
+    public Vector2Int GetRandomPositionAround(RectInt area)
     {
         while (IsThereAnyTileLeft())
         {
