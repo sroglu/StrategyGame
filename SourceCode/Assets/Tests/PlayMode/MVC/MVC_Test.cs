@@ -3,7 +3,7 @@ using NUnit.Framework;
 using System;
 using UnityEngine;
 
-public class MVC
+public class MVC_Test
 {
     [Test]
     public void CreateEmptyComponent()

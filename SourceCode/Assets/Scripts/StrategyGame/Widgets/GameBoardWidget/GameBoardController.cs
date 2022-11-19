@@ -1,17 +1,17 @@
 using System;
 using UnityEngine;
-using mehmetsrl.Algorithms.Graph;
 using System.Collections.Generic;
 using mehmetsrl.Algorithms.DataStructures;
-using System.Collections;
-using UnityEngine.InputSystem;
-using UnityEngine.EventSystems;
 using UnityEngine.Events;
-using UnityEditor;
 
 public partial class GameBoardController : Controller<GameBoardView, GameBoardModel>
 {
+    #region Properties
     Tile_Vector2Int<UnitController>[,] gameBoard;
+    UnitController activeUnit;
+    RectInt projectionArea;
+    #endregion
+
     public GameBoardController(GameBoardModel model,GameBoardView view) : base(ControllerType.instance, model, view)
     {
     }
@@ -19,9 +19,6 @@ public partial class GameBoardController : Controller<GameBoardView, GameBoardMo
     {
         CreateGameBoard();
     }
-
-    UnitController activeUnit;
-    RectInt projectionArea;
 
     public void OnRightClickOnBoard(Vector2 viewRelativePosition)
     {
@@ -70,7 +67,6 @@ public partial class GameBoardController : Controller<GameBoardView, GameBoardMo
     }
 
     #region GameboardEvents
-
     Queue<UnityAction<Vector2Int>> actionsWaitingLeftClickEvent = new Queue<UnityAction<Vector2Int>>();
     Queue<UnityAction<Vector2Int>> actionsWaitingRightClickEvent = new Queue<UnityAction<Vector2Int>>();
 
@@ -85,12 +81,12 @@ public partial class GameBoardController : Controller<GameBoardView, GameBoardMo
         switch (e.method)
         {
             case Events.AddUnitEventArgs.UnitAddMethod.SpawnByPositionSelection:
-                projectionArea = new RectInt(Vector2Int.zero,e.unit.SizeByUnit);
+                projectionArea = new RectInt(Vector2Int.zero, e.unit.SizeByUnit);
                 View.StartCoroutine(ShowFeedbackOnGameBoard());
 
                 actionsWaitingLeftClickEvent.Enqueue(
                         new UnityAction<Vector2Int>(
-                        (Vector2Int targetCoord) => 
+                        (Vector2Int targetCoord) =>
                         {
                             if (TryPlaceUnit(e.unit, targetCoord))
                             {
@@ -100,7 +96,7 @@ public partial class GameBoardController : Controller<GameBoardView, GameBoardMo
                             {
                                 e.unit.Abandon();
                             }
-                            projectionArea = new RectInt(Vector2Int.zero,Vector2Int.zero);
+                            projectionArea = new RectInt(Vector2Int.zero, Vector2Int.zero);
                         }
                         ));
                 break;
@@ -123,10 +119,11 @@ public partial class GameBoardController : Controller<GameBoardView, GameBoardMo
                 break;
             case Events.AddUnitEventArgs.UnitAddMethod.Spawn_AtRandomPosAroundUnit:
                 var spawnerUnit = source as UnitController;
-                var spawnArea = GetTilePositionsAroundUnit(spawnerUnit);
-                if (spawnArea.Count > 0)
+                //var spawnArea = GetTilePositionsAroundUnit(spawnerUnit);
+                Vector2Int randomPosAroundUnit = GetRandomPositionAround(new RectInt(spawnerUnit.PositionByUnit, spawnerUnit.SizeByUnit));
+                if (randomPosAroundUnit != InvalidPosition)
                 {
-                    TryPlaceUnit(e.unit, spawnArea[UnityEngine.Random.Range(0, spawnArea.Count)]);
+                    PlaceUnit(e.unit, randomPosAroundUnit);
                 }
                 else
                 {
@@ -135,7 +132,6 @@ public partial class GameBoardController : Controller<GameBoardView, GameBoardMo
                 break;
         }
     }
-
     public void HandleUnitOperations(Events.OperationEvent e)
     {
         if (e == null) return;
@@ -161,34 +157,5 @@ public partial class GameBoardController : Controller<GameBoardView, GameBoardMo
         }
 
     }
-
-
-    IEnumerator ShowFeedbackOnGameBoard()
-    {
-        Vector2 relativePos;
-        Rect areaOfInterest;
-        while (projectionArea.size != Vector2Int.zero)
-        {
-            relativePos = View.CalculateRelativePos(Pointer.current.position.ReadValue());
-            projectionArea.position = GetBoardCoordsFromRelativePosition(relativePos);
-            areaOfInterest = new Rect(GetBoardRelativePositionFromCoords(projectionArea.position), GetPxelSizeFromUnitSize(projectionArea.size));
-
-            if (CheckAreaIsAvailable(projectionArea))
-            {
-                View.FeedbackOnArea(areaOfInterest, Color.green);
-            }
-            else
-            {
-                View.FeedbackOnArea(areaOfInterest, Color.red);
-            }
-
-            yield return new WaitForFixedUpdate();
-        }
-        View.EndFeedback();
-        yield return null;
-
-    }
-
-
     #endregion
 }

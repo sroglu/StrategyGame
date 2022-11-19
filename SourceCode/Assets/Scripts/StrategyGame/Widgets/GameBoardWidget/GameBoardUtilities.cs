@@ -4,8 +4,12 @@ using UnityEngine;
 using mehmetsrl.Algorithms.DataStructures;
 using mehmetsrl.Algorithms.Graph;
 using System.Linq;
+using UnityEngine.InputSystem;
+
 public partial class GameBoardController : Controller<GameBoardView, GameBoardModel>
 {
+    public Vector2Int InvalidPosition { get { return Vector2Int.one * -1; } }
+
     #region UtilityFunctions
 
     //Board Functions
@@ -77,8 +81,33 @@ public partial class GameBoardController : Controller<GameBoardView, GameBoardMo
 
         return result;
     }
+    IEnumerator ShowFeedbackOnGameBoard()
+    {
+        Vector2 relativePos;
+        Rect areaOfInterest;
+        while (projectionArea.size != Vector2Int.zero)
+        {
+            relativePos = View.CalculateRelativePos(Pointer.current.position.ReadValue());
+            projectionArea.position = GetBoardCoordsFromRelativePosition(relativePos);
+            areaOfInterest = new Rect(GetBoardRelativePositionFromCoords(projectionArea.position), GetPxelSizeFromUnitSize(projectionArea.size));
 
-    //Unit Functions
+            if (CheckAreaIsAvailable(projectionArea))
+            {
+                View.FeedbackOnArea(areaOfInterest, Color.green);
+            }
+            else
+            {
+                View.FeedbackOnArea(areaOfInterest, Color.red);
+            }
+
+            yield return new WaitForFixedUpdate();
+        }
+        View.EndFeedback();
+        yield return null;
+
+    }
+
+    //Unit Functions Interface could be used
     public UnitController GetUnitAtCoord(Vector2Int coord)
     {
         if (coord.x >= 0 && coord.x < gameBoard.GetLength(0) && coord.y >= 0 && coord.y < gameBoard.GetLength(1))
@@ -144,13 +173,13 @@ public partial class GameBoardController : Controller<GameBoardView, GameBoardMo
     IEnumerator MoveUnit(UnitController unit, Vector2Int targetCoord)
     {
         var path = FindShortestPath(new Tile_Vector2Int<UnitController>(unit, unit.PositionByUnit), new Tile_Vector2Int<UnitController>(null, targetCoord));
-
-        while (path.Count > 0)
+        while (path!=null && path.Count > 0)
         {
             var nextTile = path.Dequeue();
             if (nextTile.Holder != null)
             {
                 path = FindShortestPath(new Tile_Vector2Int<UnitController>(unit, unit.PositionByUnit), new Tile_Vector2Int<UnitController>(null, targetCoord));
+                if (path == null) yield return null;
                 nextTile = path.Dequeue();
             }
 
@@ -178,29 +207,23 @@ public partial class GameBoardController : Controller<GameBoardView, GameBoardMo
         return false;
     }
 
-    List<Vector2Int> GetTilePositionsAroundUnit(UnitController unit, uint range = 1)
+    bool IsThereAnyTileLeft()
     {
-        var result = new List<Vector2Int>();
-
-        for (int x = (int)(unit.PositionByUnit.x - range); x < unit.PositionByUnit.x + unit.SizeByUnit.x + range; x++)
+        return Tile_Vector2Int<UnitController>.OccupiedTile < gameBoard.GetLength(0) * gameBoard.GetLength(1);
+    }
+    Vector2Int GetRandomPositionAround(RectInt area)
+    {
+        while (IsThereAnyTileLeft())
         {
-            for (int y = (int)(unit.PositionByUnit.y - range); y < unit.PositionByUnit.y + unit.SizeByUnit.y + range; y++)
+            var spawnArea = GetTilePositionsAroundArea(area);
+            if(spawnArea.Count>0)
             {
-                //Skip area that spawner unit placed
-                if (x >= unit.PositionByUnit.x && x < unit.PositionByUnit.x + unit.SizeByUnit.x &&
-                    y >= unit.PositionByUnit.y && y < unit.PositionByUnit.y + unit.SizeByUnit.y)
-                {
-                    continue;
-                }
-
-                Vector2Int candidateTileCoords = new Vector2Int(x, y);
-                if (CheckAreaIsAvailable(new RectInt(candidateTileCoords, Vector2Int.one)))
-                {
-                    result.Add(candidateTileCoords);
-                }
+                return spawnArea[Random.Range(0, spawnArea.Count)];
             }
+            area.position -= Vector2Int.one;
+            area.size += Vector2Int.one * 2;
         }
-        return result;
+        return InvalidPosition;
     }
 
     //Path Finding
@@ -213,6 +236,8 @@ public partial class GameBoardController : Controller<GameBoardView, GameBoardMo
 
         //Dijkstra Shortest Path
         //path = Dijkstra.FindPath(graph, startPoint, destination, DistanceFunction);
+
+        if (path == null) return null;
         return new Queue<Tile_Vector2Int<UnitController>>(path.Reverse());
     }
 
