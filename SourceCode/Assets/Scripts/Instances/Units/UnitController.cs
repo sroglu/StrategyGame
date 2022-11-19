@@ -61,9 +61,10 @@ public abstract class UnitController : Controller<UnitView, UnitModel>
             PerformOperation(e);
         }
     }
-
+    bool disposed=false;
     public void Abandon()
     {
+        disposed = true;
         Dispose();
     }
 
@@ -77,7 +78,7 @@ public abstract class UnitController : Controller<UnitView, UnitModel>
             View.FollowCursor();
             yield return new WaitForFixedUpdate();
         }
-        while (!Placed);
+        while (!Placed && !disposed);
         callback?.Invoke();
     }
 
