@@ -3,14 +3,17 @@ using mehmetsrl.MVC.core;
 public class ProductionController : Controller<ProductionView, ProductionModel>
 {
 
-    UnitData[] availableUnits;
-    public bool CanProduceUnit { get; private set; }
+    #region Properties
+    UnitData[] buildingUnits;
+    #endregion
 
-    public UnitData[] BuildableUnits
+    #region Accesors
+    public bool CanProduceUnit { get; private set; }
+    public UnitData[] BuildingUnits
     {
         get
         {
-            if (availableUnits == null)
+            if (buildingUnits == null)
             {
                 List<UnitData> availableUnitList = new List<UnitData>();
                 foreach (var unit in Model.CurrentData.units)
@@ -20,27 +23,30 @@ public class ProductionController : Controller<ProductionView, ProductionModel>
                         availableUnitList.Add(unit);
                     }
                 }
-                availableUnits = availableUnitList.ToArray();
+                buildingUnits = availableUnitList.ToArray();
             }
-            return availableUnits;
+            return buildingUnits;
         }
     }
+    #endregion
 
-    public ProductionController(ProductionModel model, ProductionView view) : base(ControllerType.instance, model, view)
-    {
-    }
-    protected override void OnCreate()
-    {
-        CanProduceUnit = true;
-    }
+    public ProductionController(ProductionModel model, ProductionView view) : base(ControllerType.instance, model, view) { }
+    protected override void OnCreate() { CanProduceUnit = true; }
 
+    /// <summary>
+    /// Initialize new unit based on unit data user selected on view.
+    /// </summary>
+    /// <param name="unitData">Unit data</param>
     public void InitUnit(UnitData unitData)
     {
+        //Check user alredy initialize a unit.
         if (!CanProduceUnit) return;
         CanProduceUnit = false;
 
+        //Create new unit by instance manager
         var initiatedBuildingUnitController = InstanceManager.Instance.CreateBuilding(unitData);
 
-        View.StartCoroutine(initiatedBuildingUnitController.AddUnitToGameBoard(() => CanProduceUnit = true));
+        //Add unit to gameboard by user inputs
+        View.StartCoroutine(initiatedBuildingUnitController.AddUnitToGameBoard((_) => CanProduceUnit = true));
     }
 }

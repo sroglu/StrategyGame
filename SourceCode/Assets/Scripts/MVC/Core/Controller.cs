@@ -29,21 +29,58 @@ namespace mehmetsrl.MVC.core
     {
         static Action<IController, string, string, EventArgs> RedirectToAction;
 
+        #region Properties
         protected ControllerType ControllerType = ControllerType.instance;
 
+        #endregion
         protected ControllerBase(ControllerType controllerType)
         {
             ControllerType = controllerType;
             RedirectToAction += OnRedirectToAction;
         }
+
+        #region UtilityFunctions    
+        /// <summary>
+        /// Getter function for model.
+        /// </summary>
+        /// <returns>Model</returns>
+        public abstract IModel GetModel();
+        /// <summary>
+        /// Getter function for view.
+        /// </summary>
+        /// <returns>View</returns>
+        public abstract ViewBase GetView();
+        /// <summary>
+        /// Redirect an event to all controllers
+        /// If controller has implementation proccess it
+        /// </summary>
+        /// <param name="actionName">Action name</param>
+        /// <param name="data">Additional data</param>
         protected void Redirect(string actionName, EventArgs data = null)
         {
             RedirectToAction(this, actionName, null, data);
         }
+
+        /// <summary>
+        /// Redirect an event to specified controller
+        /// Controller should not be an instance type controller
+        /// </summary>
+        /// <param name="actionName">Action name</param>
+        /// <param name="controllerName">Target controller that handle the event</param>
+        /// <param name="data">Additional data</param>
         protected void Redirect(string actionName, string controllerName, EventArgs data = null)
         {
             RedirectToAction(this, actionName, controllerName, data);
         }
+
+        /// <summary>
+        /// Distributes redirect calls.
+        /// If controller name is null it triggers for all controllers
+        /// </summary>
+        /// <param name="source">Source controller that redirects event</param>
+        /// <param name="actionName">Action name</param>
+        /// <param name="controllerName">Target controller that handle the event</param>
+        /// <param name="data">Additional data</param>
         void OnRedirectToAction(IController source, string actionName, string controllerName, EventArgs data)
         {
             if (controllerName == null || controllerName == GetType().ToString())
@@ -51,12 +88,19 @@ namespace mehmetsrl.MVC.core
                 OnActionRedirected(source, actionName, data);
             }
         }
+        #endregion
 
-
-        public abstract IModel GetModel();
-        public abstract ViewBase GetView();
-        public abstract void Dispose();
+        #region Overridables
+        /// <summary>
+        /// Handle function for redirected events
+        /// All controllers implement the events they responsible.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="actionName"></param>
+        /// <param name="data"></param>
         protected virtual void OnActionRedirected(IController source, string actionName, EventArgs data) { }
+        public abstract void Dispose();
+        #endregion
     }
 
     /// <summary>

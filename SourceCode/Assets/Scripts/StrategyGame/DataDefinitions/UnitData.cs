@@ -10,6 +10,9 @@ public enum UnitType
     agent
 }
 
+/// <summary>
+/// Unit data
+/// </summary>
 [CreateAssetMenu(fileName = "New Unit", menuName = "Unit")]
 public class UnitData : ScriptableObject,ICloneable
 {

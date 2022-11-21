@@ -12,11 +12,18 @@ public class ProductionSlot : MonoBehaviour, IPointerClickHandler
     public Image image;
     public UnityAction OnClick;
 
+    /// <summary>
+    /// Pointer click action call.
+    /// </summary>
+    /// <param name="eventData"></param>
     public void OnPointerClick(PointerEventData eventData)
     {
         OnClick?.Invoke();
     }
 
+    /// <summary>
+    /// Clears slot properties.
+    /// </summary>
     public void Clear()
     {
         OnClick = null;

@@ -1,8 +1,9 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Gamgeboard data
+/// </summary>
 [System.Serializable]
 public class GameBoardData : ICloneable
 {
@@ -18,7 +19,6 @@ public class GameBoardData : ICloneable
                 (int)(playgroundArea.y / tileSize.y));
         }
     }
-
     public object Clone()
     {
         return MemberwiseClone();

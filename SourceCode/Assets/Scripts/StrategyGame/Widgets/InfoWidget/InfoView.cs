@@ -34,21 +34,21 @@ public class InfoView : View<InfoModel>
     GridLayoutGroup efContentGrid;
     RectTransform efContentRT;
     string effectTitleText = "Effects";
-    string operationTitleText = "Operations";
+    string operationTitleText = "Operations";    
+    
+    List<OperationButton> opButtonsList;
+    List<Text> efTextList;
     #endregion
-
 
     protected override void OnCreate()
     {
         Model = new InfoModel(emptyPropertyData);
-        opContentGrid= operationListScroll.content.GetComponent<GridLayoutGroup>();
-        opContentRT = operationListScroll.content.GetComponent<RectTransform>();
-        efContentGrid = effectListScroll.content.GetComponent<GridLayoutGroup>();
-        efContentRT = effectListScroll.content.GetComponent<RectTransform>();
+        ProcessViewElements();
     }
 
-    List<OperationButton> opButtonsList;
-    List<Text> efTextList;
+    /// <summary>
+    /// Overrides base function for this specified view.
+    /// </summary>
     public override void UpdateView()
     {
         //Model related
@@ -58,6 +58,7 @@ public class InfoView : View<InfoModel>
             return;
         }
 
+        //Fill view elements
         title.text = Model.CurrentData.title;
         description.text = Model.CurrentData.description;
         if (Model.CurrentData.image)
@@ -72,16 +73,28 @@ public class InfoView : View<InfoModel>
 
         FillOperations();
         FillEffects();
-
-
     }
 
+    #region UtilityFunctions
+    /// <summary>
+    /// Get UI element components
+    /// </summary>
+    void ProcessViewElements()
+    {
+        opContentGrid = operationListScroll.content.GetComponent<GridLayoutGroup>();
+        opContentRT = operationListScroll.content.GetComponent<RectTransform>();
+        efContentGrid = effectListScroll.content.GetComponent<GridLayoutGroup>();
+        efContentRT = effectListScroll.content.GetComponent<RectTransform>();
+    }
+
+    /// <summary>
+    /// Fills operation list
+    /// </summary>
     void FillOperations()
     {
-
         opContentGrid.cellSize = new Vector2(opContentRT.rect.width, opContentRT.rect.width / listItemAspectRatio);
 
-        ClearActionScroll();
+        ClearOperationList();
 
         opButtonsList = new List<OperationButton>();
 
@@ -93,16 +106,17 @@ public class InfoView : View<InfoModel>
 
             opButtonsList.Add(operationButton);
         }
-
         operationTitle.text = opButtonsList.Count > 0 ? operationTitleText : "";
-
         opContentRT.sizeDelta = new Vector2(0, Model.CurrentData.operations.Length * opContentGrid.cellSize.y);
     }
 
+    /// <summary>
+    /// Fills effect list
+    /// </summary>
     void FillEffects()
     {
         efContentGrid.cellSize = new Vector2(efContentRT.rect.width, efContentRT.rect.width / listItemAspectRatio);
-        ClearEffectScroll(); 
+        ClearEffectList(); 
         efTextList = new List<Text>();
 
         foreach (var effect in Model.CurrentData.effects)
@@ -117,7 +131,10 @@ public class InfoView : View<InfoModel>
         efContentRT.sizeDelta = new Vector2(0, Model.CurrentData.effects.Length * efContentGrid.cellSize.y);
     }
 
-    void ClearActionScroll()
+    /// <summary>
+    /// Clear operation list
+    /// </summary>
+    void ClearOperationList()
     {
         if (opButtonsList != null)
         {
@@ -129,8 +146,10 @@ public class InfoView : View<InfoModel>
             opButtonsList.Clear();
         }
     }
-
-    void ClearEffectScroll()
+    /// <summary>
+    /// Clear effect list
+    /// </summary>
+    void ClearEffectList()
     {
         if (efTextList != null)
         {
@@ -142,15 +161,20 @@ public class InfoView : View<InfoModel>
         }
     }
 
-
+    /// <summary>
+    /// Clear all view elements
+    /// </summary>
     void SetEmpty()
     {
         title.text = "";
         description.text = "";
         effectTitle.text = "";
         operationTitle.text = "";
-        ClearActionScroll();
-        ClearEffectScroll();
+        ClearOperationList();
+        ClearEffectList();
     }
+
+    #endregion
+
 
 }

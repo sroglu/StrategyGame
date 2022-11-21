@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-
     //Singleton
     private static GameManager _instance;
     public static GameManager Instance
@@ -20,11 +19,9 @@ public class GameManager : MonoBehaviour
     }
 
     #region Properties
-    public enum gameState { gameboard }
     //GamePages
     [SerializeField]
     Dictionary<gameState, IController> pages;
-    public IController CurrentPage { get { return pages[State]; } }
     #endregion
 
     #region EditorBindings
@@ -35,7 +32,9 @@ public class GameManager : MonoBehaviour
     #endregion
 
     #region Accesors
+    public enum gameState { gameboard }
     public gameState State { get { return state; } private set { state = value; } }
+    public IController CurrentPage { get { return pages[State]; } }
     public GameData GameData { get { return gameData; } }
     #endregion
 

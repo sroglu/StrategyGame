@@ -2001,8 +2001,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 203934436}
-        m_TargetAssemblyTypeName: ProductionView, Assembly-CSharp
-        m_MethodName: OnRequireNewSlot
+        m_TargetAssemblyTypeName: ProductionView, mehmetsrl.StrategyGame
+        m_MethodName: OnRequireNewRow
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

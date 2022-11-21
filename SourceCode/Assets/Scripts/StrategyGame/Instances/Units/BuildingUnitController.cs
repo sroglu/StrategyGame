@@ -1,7 +1,7 @@
-using System;
-using UnityEngine;
-using UnityEngine.InputSystem;
 
+/// <summary>
+/// Controller for buildings in the game
+/// </summary>
 public class BuildingUnitController : UnitController
 {
     public BuildingUnitController(UnitModel model) : base(model)

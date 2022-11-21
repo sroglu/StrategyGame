@@ -1,6 +1,5 @@
 using System;
 
-
 [System.Serializable]
 public class Operation
 {
@@ -8,7 +7,6 @@ public class Operation
     public string command;
     public float amount;
 }
-
 [System.Serializable]
 public class Effect
 {
@@ -16,6 +14,10 @@ public class Effect
     public string effect;
     public float amount;
 }
+
+/// <summary>
+/// Property data
+/// </summary>
 [System.Serializable]
 public class PropertyData : ICloneable
 {

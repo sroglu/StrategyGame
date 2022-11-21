@@ -5,11 +5,6 @@ using UnityEngine.UI;
 
 public class UnitView : View<UnitModel>
 {
-    #region Accesors
-    new UnitController Controller { get { return base.Controller as UnitController; } }
-
-    #endregion
-
     #region EditorBindings
     [SerializeField]
     Image image;
@@ -27,16 +22,24 @@ public class UnitView : View<UnitModel>
     public override void UpdateView()
     {
     }
-
-    public void Place(RectTransform parent, Vector2 position, Vector2 anchoredMin, Vector2 anchoredMax)
+    /// <summary>
+    /// Place unit view on specified position under specified parent
+    /// </summary>
+    /// <param name="parent">Parent</param>
+    /// <param name="position">Relative position</param>
+    /// <param name="anchoredMin">AnchoredMinimum</param>
+    /// <param name="anchoredMax">anchoredMaximum</param>
+    public void Place(Transform parent, Vector2 position, Vector2 anchoredMin, Vector2 anchoredMax)
     {
         rectTransform.parent = parent;
         rectTransform.anchorMin = anchoredMin;
         rectTransform.anchorMax = anchoredMax;
         rectTransform.anchoredPosition = position;
     }
-
-    public void FollowCursor()
+    /// <summary>
+    /// Simple method for folluwing pointer
+    /// </summary>
+    public void FollowPointer()
     {
         rectTransform.anchoredPosition = Pointer.current.position.ReadValue();
     }

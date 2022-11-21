@@ -18,7 +18,6 @@ public class GameBoardView : View<GameBoardModel>, IPointerClickHandler
     Image feedbackImage;
     #endregion
 
-
     #region Properties
     RectTransform playgroundRT;
     RectTransform feedbackImageRT;
@@ -29,35 +28,65 @@ public class GameBoardView : View<GameBoardModel>, IPointerClickHandler
 
     #endregion
 
-    public void SetEditorBindings(GameBoardData boardData, GridLayoutGroup gameBoard, Grid tilePrefab, Image feedbackImage)
-    {
-        this.boardData = boardData;
-        this.gameBoard = gameBoard;
-        this.tilePrefab = tilePrefab;
-        this.feedbackImage = feedbackImage;
-    }
-
-
     protected override void OnCreate()
     {
-        //RectTransform of the playground could be needed later.
-        playgroundRT = gameBoard.GetComponent<RectTransform>();
-        feedbackImageRT=feedbackImage.GetComponent<RectTransform>();
-
         boardData.playgroundArea = rectTransform.rect.size;
-
         Model = new GameBoardModel(boardData);
+        ProcessViewElements();
+    }
+    public override void UpdateView() { }
 
 
-        
+    #region EventHandlers
+
+    /// <summary>
+    /// Handles click events on view.
+    /// </summary>
+    /// <param name="eventData"> Pointer event of Unity</param>
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        if (eventData.button == PointerEventData.InputButton.Left)
+            Controller.OnClickOnBoard(CalculateRelativePos(eventData.position));
+        else if (eventData.button == PointerEventData.InputButton.Right)
+            Controller.OnRightClickOnBoard(CalculateRelativePos(eventData.position));
+    }
+    #endregion
+
+    #region UtilityFunctions
+
+    /// <summary>
+    /// Claculates relative position by given viewport position.
+    /// </summary>
+    /// <param name="pointerPos">Ponter position</param>
+    /// <returns>View relative position</returns>
+    public Vector2 CalculateRelativePos(Vector2 pointerPos)
+    {
+        Vector2 relativePos = (Vector2)transform.InverseTransformPoint(pointerPos + new Vector2(rectTransform.rect.width / 2, rectTransform.rect.height / 2));
+        relativePos = new Vector2(relativePos.x, rectTransform.rect.height - relativePos.y);
+        return relativePos;
+    }
+
+    /// <summary>
+    /// Calculates UI object sizes and instantiate tiles.
+    /// </summary>
+    void ProcessViewElements()
+    {
+        playgroundRT = gameBoard.GetComponent<RectTransform>();
+        feedbackImageRT = feedbackImage.GetComponent<RectTransform>();
+
         gameBoard.cellSize = Model.CurrentData.tileSize;
 
-        for (int i = 0; i < Model.CurrentData.tileNum.x* Model.CurrentData.tileNum.y; i++)
+        for (int i = 0; i < Model.CurrentData.tileNum.x * Model.CurrentData.tileNum.y; i++)
         {
             GameObject.Instantiate(tilePrefab, playgroundRT);
         }
     }
 
+    /// <summary>
+    /// Shows feedback by using unity UI elements.
+    /// </summary>
+    /// <param name="area">Feedback area</param>
+    /// <param name="color">Color of the feedback area</param>
     public void FeedbackOnArea(Rect area, Color color)
     {
         feedbackImageRT.anchoredPosition = area.position;
@@ -67,36 +96,14 @@ public class GameBoardView : View<GameBoardModel>, IPointerClickHandler
         feedbackImage.gameObject.SetActive(true);
     }
 
+    /// <summary>
+    /// Finilize feedback
+    /// </summary>
     public void EndFeedback()
     {
         feedbackImage.gameObject.SetActive(false);
-
     }
+    #endregion
 
-
-    public void OnPointerClick(PointerEventData eventData)
-    {
-        if(eventData.button==PointerEventData.InputButton.Left)
-            Controller.OnClickOnBoard(CalculateRelativePos(eventData.position));
-        else if(eventData.button==PointerEventData.InputButton.Right)
-            Controller.OnRightClickOnBoard(CalculateRelativePos(eventData.position));
-    }
-
-    public Vector2 CalculateRelativePos(Vector2 pointerPos)
-    {
-        Vector2 relativePos = (Vector2)transform.InverseTransformPoint(pointerPos + new Vector2(rectTransform.rect.width / 2, rectTransform.rect.height / 2));
-        relativePos = new Vector2(relativePos.x, rectTransform.rect.height - relativePos.y);
-        return relativePos;
-    }
-
-    public void AddInstanceToPlayground(RectTransform instanceTransform)
-    {
-        instanceTransform.parent = InstanceManager.Instance.transform;
-    }
-
-    public override void UpdateView()
-    {
-
-    }
 
 }
