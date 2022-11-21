@@ -1,9 +1,8 @@
-using System;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using mehmetsrl.Utils.DesignPatterns;
-using UnityEngine.Events;
+using mehmetsrl.MVC.core;
+
 
 class RowElement
 {

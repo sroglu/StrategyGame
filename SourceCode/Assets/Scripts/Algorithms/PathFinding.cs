@@ -6,9 +6,10 @@ using mehmetsrl.Algorithms.DataStructures;
 
 namespace mehmetsrl.Algorithms.Graph
 {
-
 	/// <summary>
 	/// Generic Implementation of the A* algorithm.
+	/// I found it at https://gist.github.com/THeK3nger/7734169
+	/// I added Dijkstra implementation
 	/// </summary>
 	public class AStar
 	{
@@ -47,7 +48,7 @@ namespace mehmetsrl.Algorithms.Graph
 			if (CollectProfiling) st.Start();
 			while (!queue.IsEmpty)
 			{
-				var path = queue.DeleteMin().Value;
+				var path = queue.PopMin().Value;
 
 				if (closed.Contains(path.LastStep))
 					continue;
@@ -102,7 +103,7 @@ namespace mehmetsrl.Algorithms.Graph
 			while (!queue.IsEmpty)
 			{
 
-				var path = queue.DeleteMin().Value;
+				var path = queue.PopMin().Value;
 
 				if (closed.Contains(path.LastStep))
 					continue;
@@ -139,87 +140,5 @@ namespace mehmetsrl.Algorithms.Graph
 		/// </summary>
 		/// <value>The neighbours.</value>
 		IEnumerable<T> Neighbours(T node);
-	}
-	/// <summary>
-	/// Represent a generic Path along a graph.
-	/// </summary>
-	public class Path<TNode> : IEnumerable<TNode>
-	{
-
-		#region PublicProperties
-		/// <summary>
-		/// Gets the last step.
-		/// </summary>
-		/// <value>The last step.</value>
-		public TNode LastStep { get; private set; }
-
-		/// <summary>
-		/// Gets the previous steps.
-		/// </summary>
-		/// <value>The previous steps.</value>
-		public Path<TNode> PreviousSteps { get; private set; }
-
-		/// <summary>
-		/// Gets the total cost.
-		/// </summary>
-		/// <value>The total cost.</value>
-		public double TotalCost { get; private set; }
-		#endregion
-
-		#region Constructors
-		/// <summary>
-		/// Initializes a new instance of the <see cref="Path`1"/> class.
-		/// </summary>
-		/// <param name="lastStep">Last step.</param>
-		/// <param name="previousSteps">Previous steps.</param>
-		/// <param name="totalCost">Total cost.</param>
-		Path(TNode lastStep, Path<TNode> previousSteps, double totalCost)
-		{
-			LastStep = lastStep;
-			PreviousSteps = previousSteps;
-			TotalCost = totalCost;
-		}
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="Path`1"/> class.
-		/// </summary>
-		/// <param name="start">Start.</param>
-		public Path(TNode start) : this(start, null, 0) { }
-		#endregion
-
-		/// <summary>
-		/// Adds a step to the path.
-		/// </summary>
-		/// <returns>The new path.</returns>
-		/// <param name="step">The step.</param>
-		/// <param name="stepCost">The step cost.</param>
-		public Path<TNode> AddStep(TNode step, double stepCost)
-		{
-			//UnityEngine.Debug.Log("step: "+step+"TotalCost: "+TotalCost+" + stepCost  "+stepCost+" -> cost: "+(TotalCost + stepCost));
-			return new Path<TNode>(step, this, TotalCost + stepCost);
-		}
-
-		#region EnumerableImplementation
-		/// <summary>
-		/// Gets the enumerator.
-		/// </summary>
-		/// <returns>The enumerator.</returns>
-		public IEnumerator<TNode> GetEnumerator()
-		{
-			for (Path<TNode> p = this; p != null; p = p.PreviousSteps)
-				yield return p.LastStep;
-		}
-
-		/// <summary>
-		/// Gets the enumerator.
-		/// </summary>
-		/// <returns>The enumerator.</returns>
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return this.GetEnumerator();
-		}
-
-		#endregion
-
 	}
 }

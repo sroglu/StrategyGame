@@ -1,129 +1,145 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 
-
-public enum ControllerType
+namespace mehmetsrl.MVC.core
 {
-    page,
-    instance
-}
-
-
-public interface IController : IDisposable
-{
-    IModel GetModel();
-    ViewBase GetView();
-}
-
-public abstract class ControllerBase : IController
-{
-    static Action<IController,string, string, EventArgs> RedirectToAction;
-
-    protected ControllerType ControllerType = ControllerType.instance;
-
-    protected ControllerBase(ControllerType controllerType)
+    /// <summary>
+    /// Controllers can be a page or an instance.
+    /// </summary>
+    public enum ControllerType
     {
-        ControllerType = controllerType;
-        RedirectToAction += OnRedirectToAction;
+        page,
+        instance
     }
-    protected void Redirect(string actionName, EventArgs data = null)
+
+    /// <summary>
+    /// Interface for controllers.
+    /// A controller should has a model and a view.
+    /// </summary>
+    public interface IController : IDisposable
     {
-        RedirectToAction(this, actionName, null, data);
+        IModel GetModel();
+        ViewBase GetView();
     }
-    protected void Redirect(string actionName, string controllerName, EventArgs data =null)
+
+    /// <summary>
+    /// Base controller class with some common implementations
+    /// It also describes functionalities of a controller
+    /// </summary>
+    public abstract class ControllerBase : IController
     {
-        RedirectToAction(this, actionName, controllerName, data);
-    }
-    void OnRedirectToAction(IController source, string actionName, string controllerName, EventArgs data)
-    {
-        if (controllerName == null || controllerName == GetType().ToString())
+        static Action<IController, string, string, EventArgs> RedirectToAction;
+
+        protected ControllerType ControllerType = ControllerType.instance;
+
+        protected ControllerBase(ControllerType controllerType)
         {
-            OnActionRedirected(source, actionName, data);
+            ControllerType = controllerType;
+            RedirectToAction += OnRedirectToAction;
         }
-    }
-
-
-    public abstract IModel GetModel();
-    public abstract ViewBase GetView();
-    public abstract void Dispose();
-    protected virtual void OnActionRedirected(IController source, string actionName, EventArgs data) { }
-}
-
-public class Controller<V, M> : ControllerBase where V : ViewBase where M : IModel
-{
-    public static M Box(object model) { return (M)model; }
-    V pageView{get {return ViewManager.GetPageView<V>(); }}
-    V _instanceView;
-    V instanceView
-    {
-        get { 
-            if (_instanceView == null) 
-                _instanceView = ViewManager.Instance.CreateInstanceView<V>(); 
-            return _instanceView; 
-        }
-    }
-    V view;
-
-    public V View
-    {
-        get
+        protected void Redirect(string actionName, EventArgs data = null)
         {
-            if (view == null)
+            RedirectToAction(this, actionName, null, data);
+        }
+        protected void Redirect(string actionName, string controllerName, EventArgs data = null)
+        {
+            RedirectToAction(this, actionName, controllerName, data);
+        }
+        void OnRedirectToAction(IController source, string actionName, string controllerName, EventArgs data)
+        {
+            if (controllerName == null || controllerName == GetType().ToString())
             {
-                switch (ControllerType)
-                {
-                    case ControllerType.page:
-                        view = pageView;
-                        break;
-                    case ControllerType.instance:
-                        view = instanceView;
-                        break;
-                    default:
-                        view = pageView;
-                        break;
-                }
+                OnActionRedirected(source, actionName, data);
             }
-            return view;
         }
-        private set
+
+
+        public abstract IModel GetModel();
+        public abstract ViewBase GetView();
+        public abstract void Dispose();
+        protected virtual void OnActionRedirected(IController source, string actionName, EventArgs data) { }
+    }
+
+    /// <summary>
+    /// Generic controller class
+    /// It implements the relation with view and model
+    /// </summary>
+    /// <typeparam name="V"> View </typeparam>
+    /// <typeparam name="M"> Model </typeparam>
+    public class Controller<V, M> : ControllerBase where V : ViewBase where M : IModel
+    {
+        public static M Box(object model) { return (M)model; }
+        V pageView { get { return ViewManager.GetPageView<V>(); } }
+        V _instanceView;
+        V instanceView
         {
-            view = value;
+            get
+            {
+                if (_instanceView == null)
+                    _instanceView = ViewManager.Instance.CreateInstanceView<V>();
+                return _instanceView;
+            }
         }
+        V view;
+
+        public V View
+        {
+            get
+            {
+                if (view == null)
+                {
+                    switch (ControllerType)
+                    {
+                        case ControllerType.page:
+                            view = pageView;
+                            break;
+                        case ControllerType.instance:
+                            view = instanceView;
+                            break;
+                        default:
+                            view = pageView;
+                            break;
+                    }
+                }
+                return view;
+            }
+            private set
+            {
+                view = value;
+            }
+        }
+        protected M Model { get; private set; }
+
+        public Controller(ControllerType controllerType, M model, V view = null) : base(controllerType)
+        {
+            Model = model;
+            View = view;
+
+            View.Init(this);
+            OnCreate();
+
+            if (ControllerType == ControllerType.page)
+                View.Hide();
+        }
+
+        public override void Dispose()
+        {
+            OnDestroy();
+            Model.Dispose();
+            View.Dispose();
+        }
+
+        protected virtual void OnCreate() { }
+        protected virtual void OnDestroy() { }
+
+        public override sealed IModel GetModel()
+        {
+            return Model;
+        }
+
+        public override sealed ViewBase GetView()
+        {
+            return View;
+        }
+
     }
-    protected M Model { get; private set; }
-
-    public Controller(ControllerType controllerType, M model, V view = null):base(controllerType)
-    {
-        Model = model;
-        View = view;
-
-        View.Init(this);
-        OnCreate();
-
-        if (ControllerType == ControllerType.page)
-            View.Hide();
-    }
-
-    public override void Dispose()
-    {
-        OnDestroy();
-        Model.Dispose();
-        View.Dispose();
-    }
-
-    protected virtual void OnCreate() { }
-    protected virtual void OnDestroy() { }
-
-    public override sealed IModel GetModel()
-    {
-        return Model;
-    }
-
-    public override sealed ViewBase GetView()
-    {
-        return View;
-    }
-
 }

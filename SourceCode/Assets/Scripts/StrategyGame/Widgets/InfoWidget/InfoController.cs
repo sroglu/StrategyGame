@@ -1,8 +1,5 @@
+using mehmetsrl.MVC.core;
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
 public class InfoController : Controller<InfoView, InfoModel>
 {
     public InfoController(InfoModel model, InfoView view) : base(ControllerType.instance, model, view)

@@ -1,5 +1,4 @@
-using System;
-using System.Collections;
+using mehmetsrl.MVC.core;
 using System.Collections.Generic;
 using UnityEngine;
 

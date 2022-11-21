@@ -1,8 +1,5 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-
+using mehmetsrl.MVC.core;
 public class ProductionController : Controller<ProductionView, ProductionModel>
 {
 

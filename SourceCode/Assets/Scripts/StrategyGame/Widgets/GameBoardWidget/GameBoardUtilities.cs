@@ -5,6 +5,7 @@ using mehmetsrl.Algorithms.DataStructures;
 using mehmetsrl.Algorithms.Graph;
 using System.Linq;
 using UnityEngine.InputSystem;
+using mehmetsrl.MVC.core;
 
 public partial class GameBoardController : Controller<GameBoardView, GameBoardModel>
 {

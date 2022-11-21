@@ -1,7 +1,6 @@
 using NUnit.Framework;
-using System;
 using UnityEngine;
-
+using mehmetsrl.MVC.core;
 public class MVC_Test
 {
     [Test]

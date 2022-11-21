@@ -6,6 +6,10 @@ using UnityEngine;
 
 namespace mehmetsrl.Algorithms.DataStructures {
 
+    /// <summary>
+    /// Generic Vector2Int node.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class Tile_Vector2Int<T>
     {
         static uint occupiedTile = 0;
@@ -22,13 +26,22 @@ namespace mehmetsrl.Algorithms.DataStructures {
             } 
         }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="holder"></param>
+        /// <param name="position"></param>
         public Tile_Vector2Int(T holder, Vector2Int position)
         {
             this.holder = holder;
             this.position = position;
         }
 
-
+        /// <summary>
+        /// Equal function must be implemented for comparisons
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
         public override bool Equals(object obj)
         {
             var otherTile = obj as Tile_Vector2Int<T>;
@@ -42,6 +55,12 @@ namespace mehmetsrl.Algorithms.DataStructures {
             return base.GetHashCode();
         }
     }
+
+
+    /// <summary>
+    /// Data struct for algorithms that uses neigbourhood relation
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class GraphDataStruct_Vector2IntBoard<T> : IHasNeighbours<Tile_Vector2Int<T>>
     {
         Tile_Vector2Int<T>[,] tiles;
@@ -57,16 +76,30 @@ namespace mehmetsrl.Algorithms.DataStructures {
                         new Vector2Int(0,-1),
                         };
 
+        /// <summary>
+        /// Constructor method. In case of any changes it takes ref of tiles
+        /// </summary>
+        /// <param name="tiles"></param>
         public GraphDataStruct_Vector2IntBoard(ref Tile_Vector2Int<T>[,] tiles)
         {
             this.tiles = tiles;
         }
 
+        /// <summary>
+        /// Checks the node is within the gameboard bounds.
+        /// </summary>
+        /// <param name="tilePos"></param>
+        /// <returns></returns>
         bool TileWithinBounds(Vector2Int tilePos)
         {
             return (tilePos.x >= 0 && tilePos.x < tiles.GetLength(0) && tilePos.y >= 0 && tilePos.y < tiles.GetLength(1));
         }
 
+        /// <summary>
+        /// Return neigbours of a spesific node.
+        /// </summary>
+        /// <param name="tile"></param>
+        /// <returns></returns>
         public IEnumerable<Tile_Vector2Int<T>> Neighbours(Tile_Vector2Int<T> tile)
         {
             List<Tile_Vector2Int<T>> neighbours = new List<Tile_Vector2Int<T>>();

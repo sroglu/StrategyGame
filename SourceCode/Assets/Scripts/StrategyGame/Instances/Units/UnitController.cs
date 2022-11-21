@@ -1,10 +1,7 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
-using UnityEngine.EventSystems;
-
+using mehmetsrl.MVC.core;
 public class UnitController : Controller<UnitView, UnitModel>
 {
     public Vector2Int PositionByUnit { get; private set; }

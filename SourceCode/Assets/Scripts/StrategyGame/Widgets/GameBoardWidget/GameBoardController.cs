@@ -3,7 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using mehmetsrl.Algorithms.DataStructures;
 using UnityEngine.Events;
-
+using mehmetsrl.MVC.core;
 public partial class GameBoardController : Controller<GameBoardView, GameBoardModel>
 {
     #region Properties

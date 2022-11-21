@@ -1,9 +1,5 @@
-using mehmetsrl.Utils.DesignPatterns;
-using System.Collections;
-using System.Collections.Generic;
+using mehmetsrl.MVC.core;
 using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.UI;
 
 public class GamePageView : View<GamePageModel>
 {

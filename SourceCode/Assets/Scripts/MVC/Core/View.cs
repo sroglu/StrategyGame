@@ -1,137 +1,162 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
-public interface IView
+namespace mehmetsrl.MVC.core
 {
-    void Init(IController controller);
-    //void AssignModel(IModel model);
-    void UpdateView();
-    void Hide();
-    void Show();
-}
-
-[RequireComponent(typeof(RectTransform))]
-public abstract class ViewBase : MonoBehaviour, IView, IDisposable, IPointerEnterHandler, IPointerExitHandler
-{
-    public enum ViewState
+    /// <summary>
+    /// Interface for views
+    /// A view should initialized with a controller.
+    /// A view should have update method.
+    /// A view should have hide/show methods.
+    /// </summary>
+    public interface IView
     {
-        visible,
-        invisible
-    }
-    public enum CustomActionEventType
-    {
-        hold,
+        void Init(IController controller);
+        void UpdateView();
+        void Hide();
+        void Show();
     }
 
-    public UnityAction<ViewState> StateChanged;
-    public static UnityAction<CustomActionEventType, InputAction.CallbackContext, GameObject> ActionPerformed;
-
-    RectTransform _rectTransform;
-    public RectTransform rectTransform { get { if (_rectTransform == null) _rectTransform = GetComponent<RectTransform>(); return _rectTransform; } }
-    public bool IsOpen { get { return gameObject.activeInHierarchy; } }
-
-    bool inAnim = false;
-    public bool IsInAnim { get { return inAnim; } }
-    public bool IsPointerOn { get; private set; }
-    public void SetAnim(bool inAnim) { this.inAnim = inAnim; }
-
-
-    public Vector2 GetAnchoredPosition(Vector2 anchor)
+    /// <summary>
+    /// Base class for views with some common implementations.
+    /// </summary>
+    [RequireComponent(typeof(RectTransform))]
+    public abstract class ViewBase : MonoBehaviour, IView, IDisposable, IPointerEnterHandler, IPointerExitHandler
     {
-        return new Vector2(
-            ((anchor - rectTransform.pivot).x * rectTransform.rect.width + rectTransform.position.x) / Screen.width,
-            ((anchor - rectTransform.pivot).y * rectTransform.rect.height + rectTransform.position.y) / Screen.height);
-    }
-
-
-    protected virtual void Awake()
-    {
-        ActionPerformed += (CustomActionEventType actionType, InputAction.CallbackContext evArgs, GameObject targetObj) => { if (IsPointerOn) OnCustomInputAction(actionType, evArgs, targetObj); };
-        gameObject.layer = LayerMask.NameToLayer("View");
-        OnCreate();
-    }
-
-    protected void OnDestroy()
-    {
-        OnRemove();
-        ActionPerformed = null;
-    }
-
-    public ViewState State { get { if (gameObject.activeInHierarchy) return ViewState.visible; return ViewState.invisible; } }
-
-    protected virtual void OnCreate() { }
-    protected virtual void OnRemove() { }
-    protected virtual void OnDestroyInstance() { }
-    protected virtual void OnStateChanged(ViewState state) { }
-    protected virtual void OnHover(Vector2 cursorPosition) { }
-    protected virtual void OnCustomInputAction(CustomActionEventType actionType, InputAction.CallbackContext evArgs, GameObject targetObj) { }
-
-    //Public Methods
-    public virtual void Init(IController controller) { }
-    public abstract void UpdateView();
-
-    public void Hide()
-    {
-        gameObject.SetActive(false); OnStateChanged(State); StateChanged?.Invoke(State);
-    }
-    public void Show()
-    {
-        gameObject.SetActive(true); OnStateChanged(State); StateChanged?.Invoke(State);
-    }
-
-    public void OnPointerEnter(PointerEventData eventData)
-    {
-        IsPointerOn = true;
-    }
-
-    public void OnPointerExit(PointerEventData eventData)
-    {
-        IsPointerOn = false;
-    }
-
-    void FixedUpdate()
-    {
-        if (IsPointerOn)
+        #region Definitions
+        public enum ViewState
         {
-            OnHover(Pointer.current.position.ReadValue());
+            visible,
+            invisible
         }
+        public enum CustomActionEventType
+        {
+            hold,
+        }
+        #endregion
+
+        #region Properties
+        bool inAnim = false;
+        RectTransform _rectTransform;
+        #endregion
+
+        #region Accesors
+        public ViewState State { get { if (gameObject.activeInHierarchy) return ViewState.visible; return ViewState.invisible; } }
+        public RectTransform rectTransform { get { if (_rectTransform == null) _rectTransform = GetComponent<RectTransform>(); return _rectTransform; } }
+        public bool IsInAnim { get { return inAnim; } }
+        public bool IsPointerOn { get; private set; }
+        public bool IsOpen { get { return gameObject.activeInHierarchy; } }
+        #endregion
+
+        #region UtilityFunctions
+        /// <summary>
+        /// Makes the view invisible.
+        /// </summary>
+        public void Hide() { gameObject.SetActive(false); OnStateChanged(State); StateChanged?.Invoke(State); }
+        /// <summary>
+        /// Makes the view visible.
+        /// </summary>
+        public void Show() { gameObject.SetActive(true); OnStateChanged(State); StateChanged?.Invoke(State); }
+        /// <summary>
+        /// Handles the pointer events for OnHover template function
+        /// </summary>
+        public void OnPointerEnter(PointerEventData eventData) { IsPointerOn = true; }
+        /// <summary>
+        /// Handles the pointer events for OnHover template function
+        /// </summary>
+        public void OnPointerExit(PointerEventData eventData) { IsPointerOn = false; }
+        /// <summary>
+        /// Dentroy the instance.
+        /// </summary>
+        public void DestroyInstance() { Destroy(gameObject); }
+        #endregion
+
+        /// <summary>
+        /// Event pointer for state changes.
+        /// </summary>
+        public UnityAction<ViewState> StateChanged;
+        /// <summary>
+        /// Custom action pointer for custom events
+        /// </summary>
+        public static UnityAction<CustomActionEventType, InputAction.CallbackContext, GameObject> ActionPerformed;
+
+        protected virtual void Awake()
+        {
+            ActionPerformed += (CustomActionEventType actionType, InputAction.CallbackContext evArgs, GameObject targetObj) => { if (IsPointerOn) OnCustomInputAction(actionType, evArgs, targetObj); };
+            gameObject.layer = LayerMask.NameToLayer("View");
+            OnCreate();
+        }
+        
+        void FixedUpdate()
+        {
+            if (IsPointerOn)
+            {
+                OnHover(Pointer.current.position.ReadValue());
+            }
+        }
+
+        protected void OnDestroy()
+        {
+            OnRemove();
+            ActionPerformed = null;
+        }
+        /// <summary>
+        /// Dispose method destroys the instance.
+        /// </summary>
+        public void Dispose() { DestroyInstance(); }
+
+        /// <summary>
+        /// Template functions for child classes
+        /// These classes are trigerred in base class.
+        /// Implementations rely on the childs.
+        /// </summary>
+        #region TemplateFunctions
+        protected virtual void OnCreate() { }
+        protected virtual void OnRemove() { }
+        protected virtual void OnDestroyInstance() { }
+        protected virtual void OnStateChanged(ViewState state) { }
+        protected virtual void OnHover(Vector2 cursorPosition) { }
+        protected virtual void OnCustomInputAction(CustomActionEventType actionType, InputAction.CallbackContext evArgs, GameObject targetObj) { }
+
+        //Public Methods
+        public virtual void Init(IController controller) { }
+        public abstract void UpdateView();
+        #endregion
+
     }
-    public void Dispose()
+
+    /// <summary>
+    /// Generic view class
+    /// It implements the relation with controller and model
+    /// </summary>
+    /// <typeparam name="M"> Model </typeparam>
+    public abstract class View<M> : ViewBase where M : ModelBase
     {
-        Destroy(gameObject);
-    }
-    public void DestroyInstance() { }
-}
 
+        public IController Controller;
+        public M Model;
 
-public abstract class View<M> : ViewBase where M : ModelBase
-{
+        public bool IsInitiated { get { return Model != null; } }
 
-    public IController Controller;
-    public M Model;
+        public override sealed void Init(IController controller)
+        {
+            Controller = controller;
 
-    public bool IsInitiated { get { return Model!=null; } }
+            if (Model == null)
+                Model = (M)Controller.GetModel();
 
-    public override sealed void Init(IController controller)
-    {
-        Controller = controller;
+            OnInit();
+            UpdateView();
+        }
 
-        if(Model==null)
-            Model = (M)Controller.GetModel();
+        protected virtual void OnInit() { }
 
-        OnInit();
-        UpdateView();
-    }
-
-    protected virtual void OnInit(){}
-
-    protected sealed override void OnDestroyInstance()
-    {
-        Controller.Dispose();
+        protected sealed override void OnDestroyInstance()
+        {
+            Controller.Dispose();
+        }
     }
 }

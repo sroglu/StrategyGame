@@ -5,7 +5,18 @@ using UnityEngine;
 
 namespace mehmetsrl.Algorithms.DataStructures
 {
+    /// <summary>
+    /// PriorityQueue implementation. Inspired on a peer programmer code review site.
+    /// </summary>
 
+
+    /// <summary>
+    /// Generic queue entry for priority queue
+    /// It has key for compare and a value as a queue value.
+    /// To compare keys, keys should implement ICompareble interface
+    /// </summary>
+    /// <typeparam name="TKey"></typeparam>
+    /// <typeparam name="TValue"></typeparam>
     public class QueueEntry<TKey, TValue> : IComparable<QueueEntry<TKey, TValue>> where TKey : IComparable<TKey>
     {
         public QueueEntry(TKey key, TValue value)
@@ -16,21 +27,27 @@ namespace mehmetsrl.Algorithms.DataStructures
         public TKey Key { get; }
         public TValue Value { get; }
 
+        /// <summary>
+        /// Compares the keys.
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public int CompareTo(QueueEntry<TKey, TValue> other)
         {
-            Debug.Log(this.Key + "   " + other.Key);
+            //Debug.Log(this.Key + "   " + other.Key);
             if (EqualityComparer<QueueEntry<TKey, TValue>>.Default.Equals(this, other)) return 0;
             if (other == null) throw new ArgumentNullException();
             return Key.CompareTo(other.Key);
-
-            //if (this.Key > other.Key) return 1;
-            //else if(this.Key < other.Key) return -1;
-            return 0;
         }
         public override string ToString() => $"Key = {Key}, Value = {Value}";
     }
 
-
+    /// <summary>
+    /// Priority queue that 
+    /// </summary>
+    /// <typeparam name="TKey"></typeparam>
+    /// <typeparam name="TValue"></typeparam>
     public sealed class PriorityQueue<TKey, TValue> : IEnumerable<QueueEntry<TKey, TValue>>
         where TKey : IComparable<TKey>
     {
@@ -55,6 +72,11 @@ namespace mehmetsrl.Algorithms.DataStructures
         {
         }
 
+        /// <summary>
+        /// Adds new entry for the queue
+        /// </summary>
+        /// <param name="entry"></param>
+        /// <exception cref="ArgumentNullException"></exception>
         public void Add(QueueEntry<TKey, TValue> entry)
         {
             if (entry == null)
@@ -81,6 +103,12 @@ namespace mehmetsrl.Algorithms.DataStructures
             items.Add(entry);
         }
 
+        /// <summary>
+        /// Adds new entry for the queue
+        /// </summary>
+        /// <param name="entryKey"></param>
+        /// <param name="entryValue"></param>
+        /// <exception cref="ArgumentNullException"></exception>
         public void Add(TKey entryKey, TValue entryValue)
         {
             if (entryKey == null)
@@ -95,7 +123,7 @@ namespace mehmetsrl.Algorithms.DataStructures
         }
 
         //Delete the entry with the min key; O(n).
-        public QueueEntry<TKey, TValue> DeleteMin()
+        public QueueEntry<TKey, TValue> PopMin()
         {
             if (IsEmpty)
             {
@@ -119,7 +147,7 @@ namespace mehmetsrl.Algorithms.DataStructures
         }
 
         //Delete the entry with the max key; O(n).
-        public QueueEntry<TKey, TValue> DeleteMax()
+        public QueueEntry<TKey, TValue> PopMax()
         {
             if (IsEmpty)
             {

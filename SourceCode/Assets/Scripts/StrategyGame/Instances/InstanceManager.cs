@@ -1,4 +1,5 @@
 using UnityEngine;
+using mehmetsrl.MVC.core;
 
 public class InstanceManager : MonoBehaviour
 {

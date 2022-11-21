@@ -1,8 +1,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.InputSystem;
 using UnityEngine.UI;
-
+using mehmetsrl.MVC.core;
 public class GameBoardView : View<GameBoardModel>, IPointerClickHandler
 {
     #region EditorBindings

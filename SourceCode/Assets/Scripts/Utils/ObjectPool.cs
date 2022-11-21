@@ -3,7 +3,10 @@ using System.Collections.Generic;
 
 namespace mehmetsrl.Utils.DesignPatterns
 {
-
+    /// <summary>
+    /// Unityies generic implementation of object pool.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public struct PooledObject<T> : IDisposable where T : class
     {
         private readonly T m_ToReturn;
