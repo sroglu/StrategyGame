@@ -1,9 +1,11 @@
 using System;
+using UnityEngine;
 
 [System.Serializable]
 public class Operation
 {
     public string name;
+    public Sprite image;
     public string command;
     public float amount;
 }

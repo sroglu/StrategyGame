@@ -102,6 +102,7 @@ public class InfoView : View<InfoModel>
         {
             var operationButton = GameObject.Instantiate(operationButtonPrefab, operationListScroll.content);
             operationButton.mButton.onClick.AddListener(() => Controller.PerformOperation(operation));
+            operationButton.mImage.sprite = operation.image;
             operationButton.mButtonText.text = operation.name;
 
             opButtonsList.Add(operationButton);

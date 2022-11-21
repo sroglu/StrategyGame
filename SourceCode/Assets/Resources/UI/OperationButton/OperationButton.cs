@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class OperationButton : MonoBehaviour
 {
     public Button mButton;
+    public Image mImage;
     public Text mButtonText;
 
     public RectTransform mRectTransform;
