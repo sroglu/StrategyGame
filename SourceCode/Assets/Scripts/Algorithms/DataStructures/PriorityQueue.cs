@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace mehmetsrl.Algorithms.DataStructures
 {
@@ -35,7 +34,6 @@ namespace mehmetsrl.Algorithms.DataStructures
         /// <exception cref="ArgumentNullException"></exception>
         public int CompareTo(QueueEntry<TKey, TValue> other)
         {
-            //Debug.Log(this.Key + "   " + other.Key);
             if (EqualityComparer<QueueEntry<TKey, TValue>>.Default.Equals(this, other)) return 0;
             if (other == null) throw new ArgumentNullException();
             return Key.CompareTo(other.Key);

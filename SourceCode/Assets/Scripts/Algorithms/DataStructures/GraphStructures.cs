@@ -64,7 +64,7 @@ namespace mehmetsrl.Algorithms.DataStructures {
     public class GraphDataStruct_Vector2IntBoard<T> : IHasNeighbours<Tile_Vector2Int<T>>
     {
         Tile_Vector2Int<T>[,] tiles;
-        static Vector2Int[] neigbourDirections =
+        static readonly Vector2Int[] neigbourDirections =
         new Vector2Int[] {
                         new Vector2Int(1,-1),
                         new Vector2Int(1,0),
