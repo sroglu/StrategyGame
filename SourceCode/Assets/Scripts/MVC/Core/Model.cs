@@ -13,11 +13,6 @@ namespace mehmetsrl.MVC.core
         Single,
         Array
     }
-    public enum ModelData
-    {
-        PhaseDone,
-    }
-
     public abstract class ModelBase : IModel, ICloneable
     {
         public uint instanceId { get { return _instanceId; } }
@@ -27,7 +22,7 @@ namespace mehmetsrl.MVC.core
         ModelType _modelType = ModelType.Array;
 
 
-        protected static Dictionary<uint, IModel> modelDictionary = new Dictionary<uint, IModel>();
+        protected static readonly Dictionary<uint, IModel> modelDictionary = new Dictionary<uint, IModel>();
 
         protected uint RegisterNewModel()
         {
@@ -104,18 +99,6 @@ namespace mehmetsrl.MVC.core
         }
 
         #region Operations
-
-        //public void UpdateModel(T data)
-        //{
-        //    DescriptionData = data;
-        //    UpdateCurrentData();
-        //}
-        //public void UpdateModel(T[] dataArr)
-        //{
-        //    DescriptionDataArr = dataArr;
-        //    UpdateCurrentData();
-        //}
-
         public void Update(T data)
         {
             CurrentData = data;

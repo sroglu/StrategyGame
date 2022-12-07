@@ -85,52 +85,6 @@ namespace mehmetsrl.Algorithms.Graph
 	}
 
 	/// <summary>
-	/// Finds the optimal path between start and destionation TNode.
-	/// </summary>
-	/// <returns>The path.</returns>
-	/// <param name="start">Starting Node.</param>
-	/// <param name="destination">Destination Node.</param>
-	/// <param name="distance">Function to compute distance beween nodes.</param>
-	/// <typeparam name="TNode">Any class implement IHasNeighbours.</typeparam>
-	class Dijkstra
-	{
-		static public Path<TNode> FindPath<TNode>(IHasNeighbours<TNode> dataStructure, TNode start, TNode destination, Func<TNode, TNode, double> distance)
-		{
-			var closed = new HashSet<TNode>();
-			var queue = new PriorityQueue<double, Path<TNode>>();
-			queue.Add(0, new Path<TNode>(start));
-
-			while (!queue.IsEmpty)
-			{
-
-				var path = queue.PopMin().Value;
-
-				if (closed.Contains(path.LastStep))
-					continue;
-
-				if (path.LastStep.Equals(destination))
-					return path;
-
-				closed.Add(path.LastStep);
-
-				foreach (TNode n in dataStructure.Neighbours(path.LastStep))
-				{
-					if (!closed.Contains(n))
-					{
-						double d = distance(path.LastStep, n);
-						if (n.Equals(destination))
-							d = 0;
-						var newPath = path.AddStep(n, d);
-
-						queue.Add(newPath.TotalCost, newPath);
-					}
-				}
-			}
-			return null;
-		}
-	}
-
-	/// <summary>
 	/// Interface that rapresent data structures that has the ability to find node neighbours.
 	/// </summary>
 	public interface IHasNeighbours<T>

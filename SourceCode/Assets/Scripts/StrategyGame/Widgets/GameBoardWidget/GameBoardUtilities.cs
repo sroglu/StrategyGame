@@ -13,7 +13,7 @@ using mehmetsrl.MVC.core;
 public partial class GameBoardController : Controller<GameBoardView, GameBoardModel>
 {
     #region Accesors
-    public Vector2Int InvalidPosition { get { return Vector2Int.one * -1; } }
+    public Vector2Int InvalidPosition { get { return Constants.Values.InvalidVector2Int; } }
     #endregion
 
 

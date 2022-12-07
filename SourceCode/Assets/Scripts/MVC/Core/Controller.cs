@@ -111,7 +111,7 @@ namespace mehmetsrl.MVC.core
     /// <typeparam name="M"> Model </typeparam>
     public class Controller<V, M> : ControllerBase where V : ViewBase where M : IModel
     {
-        public static M Box(object model) { return (M)model; }
+        #region Accesors
         V pageView { get { return ViewManager.GetPageView<V>(); } }
         V _instanceView;
         V instanceView
@@ -124,7 +124,6 @@ namespace mehmetsrl.MVC.core
             }
         }
         V view;
-
         public V View
         {
             get
@@ -152,6 +151,7 @@ namespace mehmetsrl.MVC.core
             }
         }
         protected M Model { get; private set; }
+        #endregion
 
         public Controller(ControllerType controllerType, M model, V view = null) : base(controllerType)
         {
@@ -165,25 +165,25 @@ namespace mehmetsrl.MVC.core
                 View.Hide();
         }
 
-        public override void Dispose()
+        public override sealed void Dispose()
         {
             OnDestroy();
             Model.Dispose();
             View.Dispose();
         }
-
-        protected virtual void OnCreate() { }
-        protected virtual void OnDestroy() { }
-
         public override sealed IModel GetModel()
         {
             return Model;
         }
-
         public override sealed ViewBase GetView()
         {
             return View;
         }
+
+        #region Overridables
+        protected virtual void OnCreate() { }
+        protected virtual void OnDestroy() { }
+        #endregion
 
     }
 }

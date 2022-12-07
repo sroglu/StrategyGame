@@ -39,14 +39,12 @@ namespace mehmetsrl.MVC.core
         #endregion
 
         #region Properties
-        bool inAnim = false;
         RectTransform _rectTransform;
         #endregion
 
         #region Accesors
         public ViewState State { get { if (gameObject.activeInHierarchy) return ViewState.visible; return ViewState.invisible; } }
         public RectTransform rectTransform { get { if (_rectTransform == null) _rectTransform = GetComponent<RectTransform>(); return _rectTransform; } }
-        public bool IsInAnim { get { return inAnim; } }
         public bool IsPointerOn { get; private set; }
         public bool IsOpen { get { return gameObject.activeInHierarchy; } }
         #endregion
@@ -113,7 +111,7 @@ namespace mehmetsrl.MVC.core
         /// These classes are trigerred in base class.
         /// Implementations rely on the childs.
         /// </summary>
-        #region TemplateFunctions
+        #region Overridables
         protected virtual void OnCreate() { }
         protected virtual void OnRemove() { }
         protected virtual void OnDestroyInstance() { }
@@ -140,7 +138,6 @@ namespace mehmetsrl.MVC.core
         public M Model;
 
         public bool IsInitiated { get { return Model != null; } }
-
         public override sealed void Init(IController controller)
         {
             Controller = controller;
@@ -151,12 +148,10 @@ namespace mehmetsrl.MVC.core
             OnInit();
             UpdateView();
         }
+        protected sealed override void OnDestroyInstance() { Controller.Dispose(); }
 
+        #region Overridables
         protected virtual void OnInit() { }
-
-        protected sealed override void OnDestroyInstance()
-        {
-            Controller.Dispose();
-        }
+        #endregion
     }
 }

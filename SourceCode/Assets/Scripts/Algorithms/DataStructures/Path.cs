@@ -59,7 +59,6 @@ namespace mehmetsrl.Algorithms.Graph
 		/// <param name="stepCost">The step cost.</param>
 		public Path<TNode> AddStep(TNode step, double stepCost)
 		{
-			//UnityEngine.Debug.Log("step: "+step+"TotalCost: "+TotalCost+" + stepCost  "+stepCost+" -> cost: "+(TotalCost + stepCost));
 			return new Path<TNode>(step, this, TotalCost + stepCost);
 		}
 

@@ -1,13 +1,19 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 /// <summary>
 /// Constants for the game
 /// </summary>
 namespace Constants
 {
+    public static class Values
+    {
+        public static readonly Vector2Int InvalidVector2Int = Vector2Int.one * -1;
+    }
+
     public static class Events
     {
-        public static List<string> All = new List<string> { 
+        public static readonly List<string> All = new List<string> { 
             AddUnit, 
             ShowUnitInfo, 
             PerformOperation,
@@ -18,7 +24,7 @@ namespace Constants
     }
     public static class Operations
     {
-        public static List<string> All = new List<string> {
+        public static readonly List<string> All = new List<string> {
             SpawnAgent, 
             Move,
             DealDamage,
@@ -29,7 +35,7 @@ namespace Constants
     }
     public static class Effects
     {
-        public static List<string> All = new List<string> {
+        public static readonly List<string> All = new List<string> {
             BoostAttackDamage,
             BoostAttackSpeed,
             BoostMovementSpeed,
@@ -48,7 +54,7 @@ namespace Constants
     }
     public static class Controllers
     {
-        public static List<string> All = new List<string> {
+        public static readonly List<string> All = new List<string> {
             GameBoardController,
             InfoController,
             ProductionController,

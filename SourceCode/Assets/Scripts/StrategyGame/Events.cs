@@ -33,7 +33,7 @@ namespace Events
         public AddUnitEventArgs(UnitController unit) : base(unit)
         {
             this.method = UnitAddMethod.SpawnByPositionSelection;
-            this.position = Vector2.one * -1;
+            this.position = Constants.Values.InvalidVector2Int;
         }
     }
     public class AddRandomUnitEventArgs : AddUnitEventArgs
